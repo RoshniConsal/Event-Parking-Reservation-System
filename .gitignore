@@ -1,0 +1,36 @@
+# =========================
+# Angular / Node
+# =========================
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# ASP.NET Core / Visual Studio
+# =========================
+.vs/
+bin/
+obj/
+*.user
+*.suo
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE
+# =========================
+.idea/
