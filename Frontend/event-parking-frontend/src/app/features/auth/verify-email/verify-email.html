@@ -1,0 +1,342 @@
+<section class="verify-page">
+
+  <div class="verify-glow glow-one"></div>
+  <div class="verify-glow glow-two"></div>
+
+
+  <div class="container verify-container">
+
+    <div class="verify-card glass-panel">
+
+      <!-- BRAND -->
+
+      <a
+        routerLink="/"
+        class="verify-brand"
+      >
+
+        <img
+          src="/branding/venueflow-logo.png"
+          alt="VenueFlow logo"
+        />
+
+        <div>
+
+          <strong>
+            VenueFlow
+          </strong>
+
+          <span>
+            Events. Seats. Parking. Simplified.
+          </span>
+
+        </div>
+
+      </a>
+
+
+      <!-- VERIFYING -->
+
+      @if (isVerifying()) {
+
+        <div class="verify-content">
+
+          <div class="status-icon loading-icon">
+            <span class="verify-spinner"></span>
+          </div>
+
+          <span class="eyebrow">
+            EMAIL VERIFICATION
+          </span>
+
+          <h1>
+            Verifying your email...
+          </h1>
+
+          <p>
+            Please wait while VenueFlow
+            securely verifies your account.
+          </p>
+
+        </div>
+
+      }
+
+
+      <!-- VERIFIED -->
+
+      @else if (isVerified()) {
+
+        <div class="verify-content">
+
+          <div class="status-icon success-icon">
+            ✓
+          </div>
+
+          <span class="eyebrow">
+            VERIFICATION COMPLETE
+          </span>
+
+          <h1>
+            Email verified
+            <span>successfully.</span>
+          </h1>
+
+          <p>
+            Your VenueFlow account is now active.
+            You can sign in and start managing
+            your event experience.
+          </p>
+
+          <a
+            routerLink="/login"
+            class="btn btn-primary primary-action"
+          >
+            Sign In
+            <span>→</span>
+          </a>
+
+        </div>
+
+      }
+
+
+      <!-- ERROR -->
+
+      @else if (verificationError()) {
+
+        <div class="verify-content">
+
+          <div class="status-icon error-icon">
+            !
+          </div>
+
+          <span class="eyebrow error-eyebrow">
+            VERIFICATION FAILED
+          </span>
+
+          <h1>
+            We couldn't verify
+            <span>this link.</span>
+          </h1>
+
+          <p>
+            {{ verificationError() }}
+          </p>
+
+
+          @if (email()) {
+
+            <button
+              type="button"
+              class="btn btn-primary primary-action"
+              [disabled]="isResending()"
+              (click)="resendVerification()"
+            >
+
+              @if (isResending()) {
+
+                <span class="verify-spinner small-spinner"></span>
+
+                Sending...
+
+              } @else {
+
+                Send New Verification Link
+
+              }
+
+            </button>
+
+          }
+
+
+          @if (resendMessage()) {
+
+            <div class="message-box success-message">
+              ✓ {{ resendMessage() }}
+            </div>
+
+          }
+
+
+          @if (resendError()) {
+
+            <div class="message-box error-message">
+              ! {{ resendError() }}
+            </div>
+
+          }
+
+
+          <a
+            routerLink="/login"
+            class="text-link"
+          >
+            Back to Sign In
+          </a>
+
+        </div>
+
+      }
+
+
+      <!-- REGISTER SUCCESS / CHECK EMAIL -->
+
+      @else {
+
+        <div class="verify-content">
+
+          <div class="status-icon mail-icon">
+            ✉
+          </div>
+
+          <span class="eyebrow">
+            CHECK YOUR EMAIL
+          </span>
+
+          <h1>
+            Verify your
+            <span>email address.</span>
+          </h1>
+
+          <p>
+            Your VenueFlow account has been created.
+            Use the verification link sent for:
+          </p>
+
+
+          @if (email()) {
+
+            <div class="email-display">
+
+              <span>
+                Email
+              </span>
+
+              <strong>
+                {{ email() }}
+              </strong>
+
+            </div>
+
+          }
+
+
+          <div class="instruction-box">
+
+            <div class="instruction-number">
+              1
+            </div>
+
+            <div>
+              <strong>
+                Open your verification link
+              </strong>
+
+              <p>
+                Click the VenueFlow verification
+                link provided for your account.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="instruction-box">
+
+            <div class="instruction-number">
+              2
+            </div>
+
+            <div>
+              <strong>
+                Complete verification
+              </strong>
+
+              <p>
+                The link will return you here and
+                automatically verify your account.
+              </p>
+            </div>
+
+          </div>
+
+
+          @if (email()) {
+
+            <div class="resend-area">
+
+              <p>
+                Didn't receive a verification link?
+              </p>
+
+              <button
+                type="button"
+                class="btn btn-outline resend-button"
+                [disabled]="isResending()"
+                (click)="resendVerification()"
+              >
+
+                @if (isResending()) {
+
+                  <span class="verify-spinner dark-spinner"></span>
+
+                  Sending...
+
+                } @else {
+
+                  Resend Verification
+
+                }
+
+              </button>
+
+            </div>
+
+          }
+
+
+          @if (resendMessage()) {
+
+            <div class="message-box success-message">
+
+              ✓ {{ resendMessage() }}
+
+            </div>
+
+          }
+
+
+          @if (resendError()) {
+
+            <div class="message-box error-message">
+
+              ! {{ resendError() }}
+
+            </div>
+
+          }
+
+
+          <div class="login-row">
+
+            <span>
+              Already verified?
+            </span>
+
+            <a routerLink="/login">
+              Sign in
+            </a>
+
+          </div>
+
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+
+</section>

@@ -1,0 +1,505 @@
+<section class="events-page">
+
+  <!-- HERO -->
+
+  <section class="events-hero">
+
+    <div class="hero-glow glow-one"></div>
+    <div class="hero-glow glow-two"></div>
+
+    <div class="container hero-content">
+
+      <span class="page-kicker">
+        VENUEFLOW EVENTS
+      </span>
+
+      <h1>
+        Find an experience
+        <span>
+          worth remembering.
+        </span>
+      </h1>
+
+      <p>
+        Discover upcoming events,
+        explore venues and reserve your
+        complete experience with seats
+        and parking in one place.
+      </p>
+
+
+      <div class="hero-points">
+
+        <div>
+          <span>✓</span>
+          Real-time event discovery
+        </div>
+
+        <div>
+          <span>✓</span>
+          Easy seat reservation
+        </div>
+
+        <div>
+          <span>✓</span>
+          Smart parking booking
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- EVENTS -->
+
+  <section class="events-section">
+
+    <div class="container">
+
+
+      <!-- TITLE -->
+
+      <div class="section-header">
+
+        <div>
+
+          <span class="section-kicker">
+            UPCOMING EXPERIENCES
+          </span>
+
+          <h2>
+            Explore Events
+          </h2>
+
+          <p>
+            Search and filter events by
+            name, date, category or venue.
+          </p>
+
+        </div>
+
+
+        @if (!isLoading()) {
+
+          <div class="event-count">
+
+            <strong>
+              {{ events().length }}
+            </strong>
+
+            <span>
+              Events
+            </span>
+
+          </div>
+
+        }
+
+      </div>
+
+
+      <!-- ==================================================
+           FILTER PANEL
+           ================================================== -->
+
+      <form
+        class="filter-panel glass-panel"
+        [formGroup]="filterForm"
+        (ngSubmit)="applyFilters()"
+      >
+
+        <!-- SEARCH -->
+
+        <div class="filter-field search-field">
+
+          <label for="eventSearch">
+            Search
+          </label>
+
+          <input
+            id="eventSearch"
+            type="text"
+            class="form-control"
+            formControlName="name"
+            placeholder="Search event name..."
+          />
+
+        </div>
+
+
+        <!-- DATE -->
+
+        <div class="filter-field">
+
+          <label for="eventDate">
+            Date
+          </label>
+
+          <input
+            id="eventDate"
+            type="date"
+            class="form-control"
+            formControlName="date"
+          />
+
+        </div>
+
+
+        <!-- CATEGORY -->
+
+        <div class="filter-field">
+
+          <label for="category">
+            Category
+          </label>
+
+          <select
+            id="category"
+            class="form-control"
+            formControlName="categoryId"
+          >
+
+            <option value="">
+              All Categories
+            </option>
+
+            @for (
+              category of categories();
+              track category.id
+            ) {
+
+              <option
+                [value]="category.id"
+              >
+                {{ category.name }}
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- VENUE -->
+
+        <div class="filter-field">
+
+          <label for="venue">
+            Venue
+          </label>
+
+          <select
+            id="venue"
+            class="form-control"
+            formControlName="venueId"
+          >
+
+            <option value="">
+              All Venues
+            </option>
+
+            @for (
+              venue of venues();
+              track venue.id
+            ) {
+
+              <option
+                [value]="venue.id"
+              >
+                {{ venue.name }}
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        <!-- BUTTONS -->
+
+        <div class="filter-actions">
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+          >
+            Search Events
+          </button>
+
+
+          <button
+            type="button"
+            class="btn btn-outline"
+            (click)="clearFilters()"
+            [disabled]="!hasActiveFilters()"
+          >
+            Clear
+          </button>
+
+        </div>
+
+      </form>
+
+
+      <!-- LOADING -->
+
+      @if (isLoading()) {
+
+        <div class="state-container">
+
+          <div class="loading-spinner"></div>
+
+          <h3>
+            Loading events...
+          </h3>
+
+          <p>
+            Finding VenueFlow experiences
+            for you.
+          </p>
+
+        </div>
+
+      }
+
+
+      <!-- ERROR -->
+
+      @else if (errorMessage()) {
+
+        <div class="state-container">
+
+          <div class="state-icon">
+            !
+          </div>
+
+          <h3>
+            Events couldn't be loaded
+          </h3>
+
+          <p>
+            {{ errorMessage() }}
+          </p>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="applyFilters()"
+          >
+            Try Again
+          </button>
+
+        </div>
+
+      }
+
+
+      <!-- EMPTY -->
+
+      @else if (
+        events().length === 0
+      ) {
+
+        <div class="state-container">
+
+          <div class="state-icon empty-icon">
+            ◇
+          </div>
+
+
+          @if (hasActiveFilters()) {
+
+            <h3>
+              No matching events
+            </h3>
+
+            <p>
+              Try changing or clearing
+              your search filters.
+            </p>
+
+            <button
+              type="button"
+              class="btn btn-outline"
+              (click)="clearFilters()"
+            >
+              Clear Filters
+            </button>
+
+          } @else {
+
+            <h3>
+              No events available yet
+            </h3>
+
+            <p>
+              New events will appear here
+              when they become available.
+            </p>
+
+          }
+
+        </div>
+
+      }
+
+
+      <!-- EVENTS -->
+
+      @else {
+
+        <div class="event-grid">
+
+          @for (
+            event of events();
+            track event.id
+          ) {
+
+            <article class="event-card">
+
+              <div class="event-visual">
+
+                <div class="event-category">
+                  {{ event.categoryName }}
+                </div>
+
+
+                <div class="event-date">
+
+                  <strong>
+                    {{
+                      event.startDateTime
+                        | date:'dd'
+                    }}
+                  </strong>
+
+                  <span>
+                    {{
+                      event.startDateTime
+                        | date:'MMM'
+                    }}
+                  </span>
+
+                </div>
+
+
+                <div class="visual-logo">
+                  VF
+                </div>
+
+              </div>
+
+
+              <div class="event-body">
+
+                <div class="event-time">
+
+                  <span>◷</span>
+
+                  {{
+                    event.startDateTime
+                      | date:'EEE, MMM d • h:mm a'
+                  }}
+
+                </div>
+
+
+                <h3>
+                  {{ event.name }}
+                </h3>
+
+
+                <p class="event-description">
+
+                  {{
+                    event.description
+                    ||
+                    'Discover this VenueFlow event and reserve your complete experience.'
+                  }}
+
+                </p>
+
+
+                <div class="event-location">
+
+                  <span>◆</span>
+
+                  <div>
+
+                    <small>
+                      Venue
+                    </small>
+
+                    <strong>
+                      {{ event.venueName }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <div class="event-footer">
+
+                  <div class="event-price">
+
+                    <small>
+                      Ticket from
+                    </small>
+
+
+                    @if (
+                      event.ticketPrice > 0
+                    ) {
+
+                      <strong>
+                        LKR
+                        {{
+                          event.ticketPrice
+                            | number:'1.0-2'
+                        }}
+                      </strong>
+
+                    } @else {
+
+                      <strong class="free-price">
+                        FREE
+                      </strong>
+
+                    }
+
+                  </div>
+
+
+                  <a
+                    [routerLink]="[
+                      '/events',
+                      event.id
+                    ]"
+                    class="details-button"
+                  >
+                    View Event
+                    <span>→</span>
+                  </a>
+
+                </div>
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </div>
+
+  </section>
+
+</section>

@@ -1,0 +1,47 @@
+<header class="navbar">
+  <div class="container navbar-inner">
+
+    <a
+      routerLink="/"
+      class="brand"
+    >
+      <img
+        [src]="logoPath"
+        alt="VenueFlow logo"
+        class="brand-logo"
+      />
+
+      <div class="brand-copy">
+        <span class="brand-title">
+          {{ brand }}
+        </span>
+
+        <span class="brand-tagline">
+          Events. Seats. Parking. Simplified.
+        </span>
+      </div>
+    </a>
+
+    <nav class="nav-links">
+      @for (item of items; track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+        >
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    @if (showLogin) {
+      <a
+        routerLink="/login"
+        class="btn btn-primary login-btn"
+      >
+        Sign In
+      </a>
+    }
+
+  </div>
+</header>

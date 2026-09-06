@@ -1,0 +1,527 @@
+<p>event-details works!</p>
+<section class="details-page">
+
+  <div class="details-glow glow-one"></div>
+  <div class="details-glow glow-two"></div>
+
+
+  <div class="container">
+
+
+    <!-- LOADING -->
+
+    @if (isLoading()) {
+
+      <div class="state-card">
+
+        <div class="loading-spinner"></div>
+
+        <h2>
+          Loading event...
+        </h2>
+
+        <p>
+          Getting the latest event
+          information.
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- ERROR -->
+
+    @else if (errorMessage()) {
+
+      <div class="state-card">
+
+        <div class="error-icon">
+          !
+        </div>
+
+        <h2>
+          Event unavailable
+        </h2>
+
+        <p>
+          {{ errorMessage() }}
+        </p>
+
+        <a
+          routerLink="/events"
+          class="btn btn-primary"
+        >
+          Back to Events
+        </a>
+
+      </div>
+
+    }
+
+
+    <!-- EVENT DETAILS -->
+
+    @else if (event(); as event) {
+
+      <!-- BACK -->
+
+      <a
+        routerLink="/events"
+        class="back-link"
+      >
+        ←
+        All Events
+      </a>
+
+
+      <!-- HERO CARD -->
+
+      <section class="event-hero">
+
+        <div class="hero-visual">
+
+          <span class="category-badge">
+            {{ event.categoryName }}
+          </span>
+
+
+          <div class="event-date-card">
+
+            <strong>
+              {{
+                event.startDateTime
+                  | date:'dd'
+              }}
+            </strong>
+
+            <span>
+              {{
+                event.startDateTime
+                  | date:'MMM yyyy'
+              }}
+            </span>
+
+          </div>
+
+
+          <div class="venueflow-mark">
+            VF
+          </div>
+
+        </div>
+
+
+        <div class="hero-content">
+
+          <div class="event-status">
+
+            @if (
+              isPastEvent(event)
+            ) {
+
+              <span class="status past">
+                EVENT ENDED
+              </span>
+
+            } @else {
+
+              <span class="status upcoming">
+                UPCOMING EVENT
+              </span>
+
+            }
+
+          </div>
+
+
+          <h1>
+            {{ event.name }}
+          </h1>
+
+
+          <p class="hero-description">
+
+            {{
+              event.description
+              ||
+              'Experience this VenueFlow event and manage your complete reservation from one place.'
+            }}
+
+          </p>
+
+
+          <div class="quick-info">
+
+            <div>
+
+              <span class="info-icon">
+                ◷
+              </span>
+
+              <div>
+
+                <small>
+                  Date & Time
+                </small>
+
+                <strong>
+                  {{
+                    event.startDateTime
+                      | date:'EEE, MMM d • h:mm a'
+                  }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <span class="info-icon">
+                ◆
+              </span>
+
+              <div>
+
+                <small>
+                  Venue
+                </small>
+
+                <strong>
+                  {{ event.venueName }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- CONTENT -->
+
+      <div class="content-grid">
+
+
+        <!-- LEFT -->
+
+        <main class="main-content">
+
+          <section class="info-card">
+
+            <span class="section-kicker">
+              EVENT DETAILS
+            </span>
+
+            <h2>
+              About this event
+            </h2>
+
+            <p class="description-text">
+
+              {{
+                event.description
+                ||
+                'No additional event description is available.'
+              }}
+
+            </p>
+
+          </section>
+
+
+          <section class="info-card">
+
+            <span class="section-kicker">
+              EVENT SCHEDULE
+            </span>
+
+            <h2>
+              Date & timing
+            </h2>
+
+
+            <div class="schedule-grid">
+
+              <div class="schedule-item">
+
+                <span>
+                  Start
+                </span>
+
+                <strong>
+                  {{
+                    event.startDateTime
+                      | date:'EEEE, MMMM d, yyyy'
+                  }}
+                </strong>
+
+                <small>
+                  {{
+                    event.startDateTime
+                      | date:'h:mm a'
+                  }}
+                </small>
+
+              </div>
+
+
+              <div class="schedule-item">
+
+                <span>
+                  End
+                </span>
+
+                <strong>
+                  {{
+                    event.endDateTime
+                      | date:'EEEE, MMMM d, yyyy'
+                  }}
+                </strong>
+
+                <small>
+                  {{
+                    event.endDateTime
+                      | date:'h:mm a'
+                  }}
+                </small>
+
+              </div>
+
+
+              <div class="schedule-item">
+
+                <span>
+                  Duration
+                </span>
+
+                <strong>
+                  {{ getDuration(event) }}
+                </strong>
+
+                <small>
+                  Event duration
+                </small>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <section class="info-card">
+
+            <span class="section-kicker">
+              LOCATION
+            </span>
+
+            <h2>
+              Venue information
+            </h2>
+
+
+            <div class="venue-box">
+
+              <div class="venue-icon">
+                ◆
+              </div>
+
+              <div>
+
+                <small>
+                  Event Venue
+                </small>
+
+                <strong>
+                  {{ event.venueName }}
+                </strong>
+
+                <span>
+                  VenueFlow verified location
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </main>
+
+
+        <!-- RIGHT BOOKING CARD -->
+
+        <aside class="booking-card">
+
+          <span class="booking-kicker">
+            RESERVATION SUMMARY
+          </span>
+
+
+          <h2>
+            Plan your visit
+          </h2>
+
+
+          <div class="price-row">
+
+            <span>
+              Event Ticket
+            </span>
+
+
+            @if (
+              event.ticketPrice > 0
+            ) {
+
+              <strong>
+                LKR
+                {{
+                  event.ticketPrice
+                    | number:'1.0-2'
+                }}
+              </strong>
+
+            } @else {
+
+              <strong class="free">
+                FREE
+              </strong>
+
+            }
+
+          </div>
+
+
+          <div class="price-row">
+
+            <span>
+              Parking Fee
+            </span>
+
+
+            @if (
+              event.parkingFee > 0
+            ) {
+
+              <strong>
+                LKR
+                {{
+                  event.parkingFee
+                    | number:'1.0-2'
+                }}
+              </strong>
+
+            } @else {
+
+              <strong class="free">
+                FREE
+              </strong>
+
+            }
+
+          </div>
+
+
+          <div class="price-row">
+
+            <span>
+              Capacity
+            </span>
+
+            <strong>
+              {{
+                event.capacity
+                  | number
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="booking-divider"></div>
+
+
+          @if (
+            isPastEvent(event)
+          ) {
+
+            <button
+              type="button"
+              class="btn btn-outline reserve-button"
+              disabled
+            >
+              Event Ended
+            </button>
+
+          } @else {
+
+            <button
+              type="button"
+              class="btn btn-primary reserve-button"
+              (click)="reserveEvent()"
+            >
+
+              @if (
+                !authState.isAuthenticated()
+              ) {
+
+                Sign In to Reserve
+
+              } @else if (
+                authState.role()
+                === 'Administrator'
+              ) {
+
+                Manage Events
+
+              } @else {
+
+                Reserve Your Seat
+
+              }
+
+              <span>
+                →
+              </span>
+
+            </button>
+
+          }
+
+
+          <div class="booking-features">
+
+            <div>
+              <span>✓</span>
+              Secure reservation
+            </div>
+
+            <div>
+              <span>✓</span>
+              Seat selection
+            </div>
+
+            <div>
+              <span>✓</span>
+              Parking reservation
+            </div>
+
+          </div>
+
+        </aside>
+
+      </div>
+
+    }
+
+  </div>
+
+</section>
