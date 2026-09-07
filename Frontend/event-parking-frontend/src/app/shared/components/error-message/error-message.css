@@ -1,0 +1,59 @@
+.error-box {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 14px;
+
+  padding:
+    16px 18px;
+
+  color:
+    #a52c3d;
+
+  background:
+    var(--color-danger-soft);
+
+  border:
+    1px solid
+    rgba(239, 90, 103, 0.18);
+
+  border-radius:
+    var(--radius-md);
+}
+
+.error-icon {
+  width: 34px;
+  height: 34px;
+
+  flex:
+    0 0 auto;
+
+  display: grid;
+  place-items: center;
+
+  color:
+    white;
+
+  font-weight:
+    900;
+
+  border-radius:
+    11px;
+
+  background:
+    var(--color-danger);
+}
+
+strong {
+  display: block;
+
+  margin-bottom:
+    4px;
+}
+
+p {
+  margin: 0;
+
+  line-height:
+    1.55;
+}

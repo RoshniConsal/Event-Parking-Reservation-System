@@ -1,0 +1,434 @@
+<p>register works!</p>
+<section class="register-page">
+
+  <div class="register-glow glow-one"></div>
+  <div class="register-glow glow-two"></div>
+
+  <div class="container register-shell">
+
+    <!-- LEFT BRAND SIDE -->
+
+    <div class="register-intro">
+
+      <a
+        routerLink="/"
+        class="register-brand"
+      >
+
+        <img
+          src="/branding/venueflow-logo.png"
+          alt="VenueFlow logo"
+        />
+
+        <div>
+          <strong>
+            VenueFlow
+          </strong>
+
+          <span>
+            Events. Seats. Parking. Simplified.
+          </span>
+        </div>
+
+      </a>
+
+
+      <span class="eyebrow">
+        JOIN VENUEFLOW
+      </span>
+
+      <h1>
+        One account for your
+        <span>
+          complete event journey.
+        </span>
+      </h1>
+
+      <p>
+        Create your account to discover events,
+        choose seats, reserve parking and manage
+        your bookings from one secure dashboard.
+      </p>
+
+
+      <div class="benefits">
+
+        <div class="benefit">
+          <span>✓</span>
+
+          <div>
+            <strong>
+              Easy event booking
+            </strong>
+
+            <small>
+              Find and reserve experiences quickly
+            </small>
+          </div>
+        </div>
+
+        <div class="benefit">
+          <span>✓</span>
+
+          <div>
+            <strong>
+              Seat & parking access
+            </strong>
+
+            <small>
+              Plan your complete arrival
+            </small>
+          </div>
+        </div>
+
+        <div class="benefit">
+          <span>✓</span>
+
+          <div>
+            <strong>
+              Personal dashboard
+            </strong>
+
+            <small>
+              Track bookings and payments
+            </small>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- REGISTER CARD -->
+
+    <div class="register-card glass-panel">
+
+      <div class="register-header">
+
+        <span class="eyebrow">
+          CREATE ACCOUNT
+        </span>
+
+        <h2>
+          Start your journey
+        </h2>
+
+        <p>
+          Enter your details to create
+          a VenueFlow customer account.
+        </p>
+
+      </div>
+
+
+      @if (errorMessage()) {
+
+        <div class="register-error">
+
+          <span>!</span>
+
+          <p>
+            {{ errorMessage() }}
+          </p>
+
+        </div>
+
+      }
+
+
+      <form
+        [formGroup]="registerForm"
+        (ngSubmit)="submit()"
+        novalidate
+      >
+
+        <!-- FULL NAME -->
+
+        <div class="form-group">
+
+          <label
+            for="fullName"
+            class="form-label"
+          >
+            Full name
+          </label>
+
+          <input
+            id="fullName"
+            type="text"
+            formControlName="fullName"
+            class="form-control"
+            placeholder="Enter your full name"
+            autocomplete="name"
+          />
+
+          @if (
+            registerForm.controls.fullName.touched &&
+            registerForm.controls.fullName.invalid
+          ) {
+
+            <span class="form-error">
+              Please enter your full name.
+            </span>
+
+          }
+
+        </div>
+
+
+        <!-- EMAIL + PHONE -->
+
+        <div class="two-column">
+
+          <div class="form-group">
+
+            <label
+              for="email"
+              class="form-label"
+            >
+              Email
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="form-control"
+              placeholder="you@example.com"
+              autocomplete="email"
+            />
+
+            @if (
+              registerForm.controls.email.touched &&
+              registerForm.controls.email.hasError('required')
+            ) {
+
+              <span class="form-error">
+                Email is required.
+              </span>
+
+            }
+
+            @if (
+              registerForm.controls.email.touched &&
+              registerForm.controls.email.hasError('email')
+            ) {
+
+              <span class="form-error">
+                Enter a valid email.
+              </span>
+
+            }
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label
+              for="phone"
+              class="form-label"
+            >
+              Phone number
+            </label>
+
+            <input
+              id="phone"
+              type="tel"
+              formControlName="phone"
+              class="form-control"
+              placeholder="+94 77 123 4567"
+              autocomplete="tel"
+            />
+
+            @if (
+              registerForm.controls.phone.touched &&
+              registerForm.controls.phone.invalid
+            ) {
+
+              <span class="form-error">
+                Enter a valid phone number.
+              </span>
+
+            }
+
+          </div>
+
+        </div>
+
+
+        <!-- PASSWORD -->
+
+        <div class="form-group">
+
+          <label
+            for="password"
+            class="form-label"
+          >
+            Password
+          </label>
+
+          <div class="password-control">
+
+            <input
+              id="password"
+              [type]="
+                showPassword()
+                  ? 'text'
+                  : 'password'
+              "
+              formControlName="password"
+              class="form-control"
+              placeholder="Create a password"
+              autocomplete="new-password"
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePassword()"
+            >
+              {{
+                showPassword()
+                  ? 'Hide'
+                  : 'Show'
+              }}
+            </button>
+
+          </div>
+
+          @if (
+            registerForm.controls.password.touched &&
+            registerForm.controls.password.hasError('required')
+          ) {
+
+            <span class="form-error">
+              Password is required.
+            </span>
+
+          }
+
+          @if (
+            registerForm.controls.password.touched &&
+            registerForm.controls.password.hasError('minlength')
+          ) {
+
+            <span class="form-error">
+              Password must contain at least
+              6 characters.
+            </span>
+
+          }
+
+        </div>
+
+
+        <!-- CONFIRM PASSWORD -->
+
+        <div class="form-group">
+
+          <label
+            for="confirmPassword"
+            class="form-label"
+          >
+            Confirm password
+          </label>
+
+          <div class="password-control">
+
+            <input
+              id="confirmPassword"
+              [type]="
+                showConfirmPassword()
+                  ? 'text'
+                  : 'password'
+              "
+              formControlName="confirmPassword"
+              class="form-control"
+              placeholder="Enter password again"
+              autocomplete="new-password"
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="toggleConfirmPassword()"
+            >
+              {{
+                showConfirmPassword()
+                  ? 'Hide'
+                  : 'Show'
+              }}
+            </button>
+
+          </div>
+
+          @if (
+            registerForm.controls.confirmPassword.touched &&
+            registerForm.controls.confirmPassword.hasError('required')
+          ) {
+
+            <span class="form-error">
+              Please confirm your password.
+            </span>
+
+          }
+
+          @if (
+            registerForm.controls.confirmPassword.touched &&
+            registerForm.hasError('passwordsMismatch')
+          ) {
+
+            <span class="form-error">
+              Passwords do not match.
+            </span>
+
+          }
+
+        </div>
+
+
+        <!-- SUBMIT -->
+
+        <button
+          type="submit"
+          class="btn btn-primary register-submit"
+          [disabled]="isSubmitting()"
+        >
+
+          @if (isSubmitting()) {
+
+            <span class="button-spinner"></span>
+
+            Creating account...
+
+          } @else {
+
+            Create Account
+            <span>→</span>
+
+          }
+
+        </button>
+
+      </form>
+
+
+      <div class="signin-row">
+
+        <span>
+          Already have an account?
+        </span>
+
+        <a routerLink="/login">
+          Sign in
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

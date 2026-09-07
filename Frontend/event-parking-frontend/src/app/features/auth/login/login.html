@@ -1,0 +1,309 @@
+<section class="auth-page">
+
+  <div class="auth-glow auth-glow-one"></div>
+  <div class="auth-glow auth-glow-two"></div>
+
+  <div class="container auth-grid">
+
+    <!-- LEFT SIDE -->
+
+    <div class="auth-intro">
+
+      <a
+        routerLink="/"
+        class="auth-brand"
+      >
+        <img
+          src="/branding/venueflow-logo.png"
+          alt="VenueFlow logo"
+        />
+
+        <div>
+          <strong>VenueFlow</strong>
+
+          <span>
+            Events. Seats. Parking. Simplified.
+          </span>
+        </div>
+      </a>
+
+
+      <div class="intro-content">
+
+        <span class="intro-label">
+          WELCOME BACK
+        </span>
+
+        <h1>
+          Your complete event experience,
+          <span>all in one place.</span>
+        </h1>
+
+        <p>
+          Sign in to manage your bookings,
+          seats, parking, payments and
+          notifications.
+        </p>
+
+      </div>
+
+
+      <div class="intro-features">
+
+        <div class="intro-feature">
+          <span>✓</span>
+
+          <div>
+            <strong>Fast reservations</strong>
+            <small>
+              Book your experience in minutes
+            </small>
+          </div>
+        </div>
+
+        <div class="intro-feature">
+          <span>✓</span>
+
+          <div>
+            <strong>Smart parking</strong>
+            <small>
+              Reserve before you arrive
+            </small>
+          </div>
+        </div>
+
+        <div class="intro-feature">
+          <span>✓</span>
+
+          <div>
+            <strong>Everything connected</strong>
+            <small>
+              One account for the full journey
+            </small>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- RIGHT SIDE -->
+
+    <div class="login-card glass-panel">
+
+      <div class="login-header">
+
+        <span class="login-label">
+          SECURE SIGN IN
+        </span>
+
+        <h2>Welcome back</h2>
+
+        <p>
+          Enter your VenueFlow account details.
+        </p>
+
+      </div>
+
+
+      @if (errorMessage()) {
+
+        <div class="login-error">
+          <span>!</span>
+
+          <p>
+            {{ errorMessage() }}
+          </p>
+        </div>
+
+      }
+
+
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="submit()"
+        novalidate
+      >
+
+        <!-- EMAIL -->
+
+        <div class="form-group">
+
+          <label
+            for="email"
+            class="form-label"
+          >
+            Email address
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="form-control"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+
+          @if (
+            loginForm.controls.email.touched &&
+            loginForm.controls.email.hasError('required')
+          ) {
+
+            <span class="form-error">
+              Email address is required.
+            </span>
+
+          }
+
+          @if (
+            loginForm.controls.email.touched &&
+            loginForm.controls.email.hasError('email')
+          ) {
+
+            <span class="form-error">
+              Enter a valid email address.
+            </span>
+
+          }
+
+        </div>
+
+
+        <!-- PASSWORD -->
+
+        <div class="form-group">
+
+          <div class="password-label-row">
+
+            <label
+              for="password"
+              class="form-label"
+            >
+              Password
+            </label>
+
+            <a
+              routerLink="/forgot-password"
+              class="forgot-link"
+            >
+              Forgot password?
+            </a>
+
+          </div>
+
+          <div class="password-control">
+
+            <input
+              id="password"
+              [type]="
+                showPassword()
+                  ? 'text'
+                  : 'password'
+              "
+              formControlName="password"
+              class="form-control"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePassword()"
+              [attr.aria-label]="
+                showPassword()
+                  ? 'Hide password'
+                  : 'Show password'
+              "
+            >
+              {{
+                showPassword()
+                  ? 'Hide'
+                  : 'Show'
+              }}
+            </button>
+
+          </div>
+
+          @if (
+            loginForm.controls.password.touched &&
+            loginForm.controls.password.hasError('required')
+          ) {
+
+            <span class="form-error">
+              Password is required.
+            </span>
+
+          }
+
+          @if (
+            loginForm.controls.password.touched &&
+            loginForm.controls.password.hasError('minlength')
+          ) {
+
+            <span class="form-error">
+              Password must contain at least
+              6 characters.
+            </span>
+
+          }
+
+        </div>
+
+
+        <!-- SUBMIT -->
+
+        <button
+          type="submit"
+          class="btn btn-primary login-submit"
+          [disabled]="isSubmitting()"
+        >
+
+          @if (isSubmitting()) {
+
+            <span class="button-spinner"></span>
+            Signing in...
+
+          } @else {
+
+            Sign In
+            <span>→</span>
+
+          }
+
+        </button>
+
+      </form>
+
+
+      <div class="register-section">
+
+        <span>
+          New to VenueFlow?
+        </span>
+
+        <a routerLink="/register">
+          Create an account
+        </a>
+
+      </div>
+
+
+      <div class="secure-note">
+
+        <span>◆</span>
+
+        <p>
+          Your account is protected using
+          secure authentication.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
