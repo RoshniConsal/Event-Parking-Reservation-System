@@ -1,1 +1,870 @@
-<p>admin-seats works!</p>
+<section class="admin-seat-page">
+
+  <div class="container">
+
+    @if (isLoading()) {
+
+      <div class="state-card">
+        <div class="spinner"></div>
+
+        <h2>
+          Loading seat management...
+        </h2>
+      </div>
+
+    }
+
+    @else if (
+      !event()
+    ) {
+
+      <div class="state-card">
+
+        <div class="state-icon">
+          !
+        </div>
+
+        <h2>
+          Seat management unavailable
+        </h2>
+
+        <p>
+          {{ errorMessage() }}
+        </p>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="backToEvents()"
+        >
+          Back to Events
+        </button>
+
+      </div>
+
+    }
+
+    @else if (
+      event();
+      as event
+    ) {
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="backToEvents()"
+      >
+        ← Back to Admin Events
+      </button>
+
+
+      <header class="page-header">
+
+        <div>
+
+          <span class="page-kicker">
+            VENUEFLOW ADMIN
+          </span>
+
+          <h1>
+            Seat Management
+          </h1>
+
+          <p>
+            Manage the seat map for
+            <strong>
+              {{ event.name }}
+            </strong>.
+          </p>
+
+        </div>
+
+
+        <div class="header-actions">
+
+          <button
+            type="button"
+            class="btn btn-outline"
+            (click)="refresh()"
+          >
+            ↻ Refresh
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline"
+            (click)="openGenerateForm()"
+          >
+            Generate Seat Map
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="openCreateForm()"
+          >
+            + Add Seat
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <section class="event-strip">
+
+        <div>
+          <small>
+            EVENT
+          </small>
+
+          <strong>
+            {{ event.name }}
+          </strong>
+        </div>
+
+        <div>
+          <small>
+            DATE
+          </small>
+
+          <strong>
+            {{
+              event.startDateTime
+                | date:'MMM d, yyyy • h:mm a'
+            }}
+          </strong>
+        </div>
+
+        <div>
+          <small>
+            VENUE
+          </small>
+
+          <strong>
+            {{ event.venueName }}
+          </strong>
+        </div>
+
+        <div>
+          <small>
+            BASE PRICE
+          </small>
+
+          <strong>
+            LKR
+            {{
+              event.ticketPrice
+                | number:'1.0-2'
+            }}
+          </strong>
+        </div>
+
+      </section>
+
+
+      <!-- STATS -->
+
+      <section class="stats-grid">
+
+        <article>
+          <span>
+            Total Seats
+          </span>
+
+          <strong>
+            {{ seats().length }}
+          </strong>
+        </article>
+
+        <article class="available">
+          <span>
+            Available
+          </span>
+
+          <strong>
+            {{ availableCount() }}
+          </strong>
+        </article>
+
+        <article class="held">
+          <span>
+            Held
+          </span>
+
+          <strong>
+            {{ heldCount() }}
+          </strong>
+        </article>
+
+        <article class="booked">
+          <span>
+            Booked
+          </span>
+
+          <strong>
+            {{ bookedCount() }}
+          </strong>
+        </article>
+
+      </section>
+
+
+      <!-- MESSAGES -->
+
+      @if (
+        successMessage()
+      ) {
+
+        <div class="message success">
+          ✓ {{ successMessage() }}
+        </div>
+
+      }
+
+
+      @if (
+        errorMessage()
+      ) {
+
+        <div class="message error">
+          ! {{ errorMessage() }}
+        </div>
+
+      }
+
+
+      <!-- GENERATE FORM -->
+
+      @if (
+        showGenerateForm()
+      ) {
+
+        <section class="form-card">
+
+          <div class="form-heading">
+
+            <div>
+              <span class="section-kicker">
+                AUTO GENERATE
+              </span>
+
+              <h2>
+                Generate seat map
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              class="close-button"
+              (click)="closeGenerateForm()"
+            >
+              ×
+            </button>
+
+          </div>
+
+
+          <div class="form-grid">
+
+            <label>
+
+              <span>
+                Number of Rows *
+              </span>
+
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="generateRows"
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Seats Per Row *
+              </span>
+
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="generateSeatsPerRow"
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Seat Type
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="generateSeatType"
+                placeholder="Regular"
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Price Override
+              </span>
+
+              <input
+                type="number"
+                min="0"
+                [(ngModel)]="generatePriceOverride"
+                placeholder="Use event price"
+              >
+
+            </label>
+
+          </div>
+
+
+          <div class="form-info">
+
+            {{
+              generateRows
+              *
+              generateSeatsPerRow
+            }}
+            seats will be requested.
+
+          </div>
+
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="btn btn-outline"
+              [disabled]="isSaving()"
+              (click)="closeGenerateForm()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="isSaving()"
+              (click)="generateSeatMap()"
+            >
+
+              @if (
+                isSaving()
+              ) {
+                Generating...
+              } @else {
+                Generate Seats
+              }
+
+            </button>
+
+          </div>
+
+        </section>
+
+      }
+
+
+      <!-- CREATE FORM -->
+
+      @if (
+        showCreateForm()
+      ) {
+
+        <section class="form-card">
+
+          <div class="form-heading">
+
+            <div>
+
+              <span class="section-kicker">
+                NEW SEAT
+              </span>
+
+              <h2>
+                Add single seat
+              </h2>
+
+            </div>
+
+            <button
+              type="button"
+              class="close-button"
+              (click)="closeCreateForm()"
+            >
+              ×
+            </button>
+
+          </div>
+
+
+          <div class="form-grid">
+
+            <label>
+              <span>
+                Seat Number *
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="createSeatNumber"
+                placeholder="P1"
+              >
+            </label>
+
+
+            <label>
+              <span>
+                Row Label *
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="createRowLabel"
+                placeholder="P"
+              >
+            </label>
+
+
+            <label>
+              <span>
+                Column Number *
+              </span>
+
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="createColumnNumber"
+                placeholder="1"
+              >
+            </label>
+
+
+            <label>
+              <span>
+                Seat Type
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="createSeatType"
+                placeholder="Regular"
+              >
+            </label>
+
+
+            <label>
+              <span>
+                Price Override
+              </span>
+
+              <input
+                type="number"
+                min="0"
+                [(ngModel)]="createPriceOverride"
+                placeholder="Use event price"
+              >
+            </label>
+
+          </div>
+
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="btn btn-outline"
+              [disabled]="isSaving()"
+              (click)="closeCreateForm()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="isSaving()"
+              (click)="createSeat()"
+            >
+
+              @if (
+                isSaving()
+              ) {
+                Creating...
+              } @else {
+                Create Seat
+              }
+
+            </button>
+
+          </div>
+
+        </section>
+
+      }
+
+
+      <!-- EDIT FORM -->
+
+      @if (
+        editingSeatId()
+      ) {
+
+        <section class="form-card edit-card">
+
+          <div class="form-heading">
+
+            <div>
+
+              <span class="section-kicker">
+                EDIT SEAT
+              </span>
+
+              <h2>
+                Update seat information
+              </h2>
+
+            </div>
+
+            <button
+              type="button"
+              class="close-button"
+              (click)="cancelEdit()"
+            >
+              ×
+            </button>
+
+          </div>
+
+
+          <div class="form-grid">
+
+            <label>
+              <span>
+                Seat Number *
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="editSeatNumber"
+              >
+            </label>
+
+
+            <label>
+              <span>
+                Row Label *
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="editRowLabel"
+              >
+            </label>
+
+
+            <label>
+              <span>
+                Column Number *
+              </span>
+
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="editColumnNumber"
+              >
+            </label>
+
+
+            <label>
+              <span>
+                Seat Type
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="editSeatType"
+              >
+            </label>
+
+
+            <label>
+              <span>
+                Price Override
+              </span>
+
+              <input
+                type="number"
+                min="0"
+                [(ngModel)]="editPriceOverride"
+              >
+            </label>
+
+          </div>
+
+
+          <p class="form-note">
+            Seat status is controlled by
+            booking availability and is
+            not part of the seat update
+            API.
+          </p>
+
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="btn btn-outline"
+              [disabled]="isSaving()"
+              (click)="cancelEdit()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              [disabled]="isSaving()"
+              (click)="saveEdit()"
+            >
+
+              @if (
+                isSaving()
+              ) {
+                Saving...
+              } @else {
+                Save Changes
+              }
+
+            </button>
+
+          </div>
+
+        </section>
+
+      }
+
+
+      <!-- TABLE -->
+
+      <section class="table-card">
+
+        <div class="table-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              SEAT INVENTORY
+            </span>
+
+            <h2>
+              All seats
+            </h2>
+
+          </div>
+
+          <span class="seat-count">
+            {{ seats().length }}
+            seats
+          </span>
+
+        </div>
+
+
+        @if (
+          seats().length === 0
+        ) {
+
+          <div class="empty-state">
+
+            <div>
+              S
+            </div>
+
+            <h3>
+              No seats configured
+            </h3>
+
+            <p>
+              Generate a complete seat
+              map or add individual seats.
+            </p>
+
+          </div>
+
+        }
+
+        @else {
+
+          <div class="table-wrapper">
+
+            <table>
+
+              <thead>
+                <tr>
+                  <th>
+                    Seat
+                  </th>
+
+                  <th>
+                    Row
+                  </th>
+
+                  <th>
+                    Column
+                  </th>
+
+                  <th>
+                    Type
+                  </th>
+
+                  <th>
+                    Price
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                  <th class="actions-cell">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+
+
+              <tbody>
+
+                @for (
+                  seat of sortedSeats();
+                  track seat.id
+                ) {
+
+                  <tr>
+
+                    <td>
+                      <strong class="seat-number">
+                        {{ seat.seatNumber }}
+                      </strong>
+                    </td>
+
+                    <td>
+                      {{ seat.rowLabel }}
+                    </td>
+
+                    <td>
+                      {{ seat.columnNumber }}
+                    </td>
+
+                    <td>
+                      {{
+                        seat.seatType
+                        || 'Regular'
+                      }}
+                    </td>
+
+                    <td>
+
+                      @if (
+                        seat.priceOverride !==
+                        null
+                      ) {
+
+                        LKR
+                        {{
+                          seat.priceOverride
+                            | number:'1.0-2'
+                        }}
+
+                      } @else {
+
+                        <span class="default-price">
+                          Event price
+                        </span>
+
+                      }
+
+                    </td>
+
+                    <td>
+
+                      <span
+                        class="status-badge"
+                        [class]="
+                          'status-badge '
+                          +
+                          getStatusClass(
+                            seat.status
+                          )
+                        "
+                      >
+                        {{
+                          getStatusText(
+                            seat.status
+                          )
+                        }}
+                      </span>
+
+                    </td>
+
+
+                    <td class="actions-cell">
+
+                      <button
+                        type="button"
+                        class="table-button edit"
+                        [disabled]="isSaving()"
+                        (click)="startEdit(seat)"
+                      >
+                        Edit
+                      </button>
+
+
+                      <button
+                        type="button"
+                        class="table-button delete"
+                        [disabled]="
+                          isSaving()
+                          ||
+                          seat.status !==
+                            SeatStatus.Available
+                        "
+                        (click)="deleteSeat(seat)"
+                      >
+                        Delete
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        }
+
+      </section>
+
+    }
+
+  </div>
+
+</section>

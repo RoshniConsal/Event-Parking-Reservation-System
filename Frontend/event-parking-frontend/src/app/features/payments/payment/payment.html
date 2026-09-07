@@ -1,1 +1,854 @@
-<p>payment works!</p>
+<section class="payment-page">
+
+    <div class="container">
+  
+  
+      <!-- LOADING -->
+  
+      @if (isLoading()) {
+  
+        <div class="state-card">
+  
+          <div class="spinner"></div>
+  
+          <h2>
+            Loading payment...
+          </h2>
+  
+          <p>
+            Preparing your booking
+            payment.
+          </p>
+  
+        </div>
+  
+      }
+  
+  
+      <!-- LOAD ERROR -->
+  
+      @else if (
+        errorMessage()
+        &&
+        !booking()
+      ) {
+  
+        <div class="state-card">
+  
+          <div class="state-icon">
+            !
+          </div>
+  
+          <h2>
+            Payment unavailable
+          </h2>
+  
+          <p>
+            {{ errorMessage() }}
+          </p>
+  
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="refreshBooking()"
+          >
+            Try Again
+          </button>
+  
+        </div>
+  
+      }
+  
+  
+      <!-- CONTENT -->
+  
+      @else if (
+        booking();
+        as booking
+      ) {
+  
+  
+        @if (
+          !paymentResult()
+        ) {
+  
+          <!-- BACK -->
+  
+          <button
+            type="button"
+            class="back-button"
+            (click)="backToCheckout()"
+          >
+            ← Back to Checkout
+          </button>
+  
+  
+          <!-- HEADER -->
+  
+          <header class="payment-header">
+  
+            <div>
+  
+              <span class="page-kicker">
+                VENUEFLOW PAYMENT
+              </span>
+  
+              <h1>
+                Complete your payment
+              </h1>
+  
+              <p>
+                Your booking has been
+                created. Select a payment
+                method to confirm it.
+              </p>
+  
+            </div>
+  
+  
+            <div class="secure-badge">
+  
+              <span>
+                ✓
+              </span>
+  
+              Secure Payment
+  
+            </div>
+  
+          </header>
+  
+  
+          <!-- PROGRESS -->
+  
+          <div class="progress-bar">
+  
+            <div class="progress-step complete">
+  
+              <span>
+                ✓
+              </span>
+  
+              <strong>
+                Seats
+              </strong>
+  
+            </div>
+  
+  
+            <div class="progress-line"></div>
+  
+  
+            <div class="progress-step complete">
+  
+              <span>
+                ✓
+              </span>
+  
+              <strong>
+                Parking
+              </strong>
+  
+            </div>
+  
+  
+            <div class="progress-line"></div>
+  
+  
+            <div class="progress-step complete">
+  
+              <span>
+                ✓
+              </span>
+  
+              <strong>
+                Checkout
+              </strong>
+  
+            </div>
+  
+  
+            <div class="progress-line"></div>
+  
+  
+            <div class="progress-step active">
+  
+              <span>
+                4
+              </span>
+  
+              <strong>
+                Payment
+              </strong>
+  
+            </div>
+  
+          </div>
+  
+  
+          <!-- PAYMENT ERROR -->
+  
+          @if (
+            errorMessage()
+          ) {
+  
+            <div class="error-banner">
+  
+              <div>
+                !
+              </div>
+  
+              <section>
+  
+                <strong>
+                  Payment issue
+                </strong>
+  
+                <p>
+                  {{ errorMessage() }}
+                </p>
+  
+              </section>
+  
+            </div>
+  
+          }
+  
+  
+          <div class="payment-layout">
+  
+  
+            <!-- LEFT -->
+  
+            <main class="payment-content">
+  
+  
+              <!-- BOOKING INFO -->
+  
+              <section class="payment-card">
+  
+                <span class="section-kicker">
+                  BOOKING DETAILS
+                </span>
+  
+                <h2>
+                  {{
+                    booking.eventName
+                  }}
+                </h2>
+  
+  
+                <div class="booking-grid">
+  
+                  <div>
+  
+                    <small>
+                      Booking Number
+                    </small>
+  
+                    <strong>
+                      {{
+                        booking.bookingNumber
+                      }}
+                    </strong>
+  
+                  </div>
+  
+  
+                  <div>
+  
+                    <small>
+                      Booking Status
+                    </small>
+  
+                    <strong>
+  
+                      @if (
+                        booking.status ===
+                        BookingStatus.Pending
+                      ) {
+  
+                        Pending Payment
+  
+                      }
+  
+                      @else if (
+                        booking.status ===
+                        BookingStatus.Confirmed
+                      ) {
+  
+                        Confirmed
+  
+                      }
+  
+                      @else if (
+                        booking.status ===
+                        BookingStatus.Cancelled
+                      ) {
+  
+                        Cancelled
+  
+                      }
+  
+                      @else {
+  
+                        Expired
+  
+                      }
+  
+                    </strong>
+  
+                  </div>
+  
+  
+                  <div>
+  
+                    <small>
+                      Created
+                    </small>
+  
+                    <strong>
+                      {{
+                        booking.createdAt
+                          | date:'MMM d, yyyy • h:mm a'
+                      }}
+                    </strong>
+  
+                  </div>
+  
+                </div>
+  
+              </section>
+  
+  
+              <!-- SEATS -->
+  
+              <section class="payment-card">
+  
+                <span class="section-kicker">
+                  RESERVED SEATS
+                </span>
+  
+                <h2>
+                  Your seats
+                </h2>
+  
+  
+                <div class="seat-list">
+  
+                  @for (
+                    seat of booking.seats;
+                    track seat.seatId
+                  ) {
+  
+                    <div class="seat-item">
+  
+                      <div class="seat-icon">
+                        {{
+                          seat.seatNumber
+                        }}
+                      </div>
+  
+  
+                      <div>
+  
+                        <strong>
+                          Seat
+                          {{
+                            seat.seatNumber
+                          }}
+                        </strong>
+  
+                        <span>
+                          {{
+                            seat.seatType
+                          }}
+                        </span>
+  
+                      </div>
+  
+  
+                      <strong class="price">
+  
+                        LKR
+                        {{
+                          seat.priceAtBooking
+                            | number:'1.0-2'
+                        }}
+  
+                      </strong>
+  
+                    </div>
+  
+                  }
+  
+                </div>
+  
+              </section>
+  
+  
+              <!-- PARKING -->
+  
+              <section class="payment-card">
+  
+                <span class="section-kicker">
+                  PARKING
+                </span>
+  
+                <h2>
+                  Parking reservation
+                </h2>
+  
+  
+                @if (
+                  booking.parking;
+                  as parking
+                ) {
+  
+                  <div class="parking-item">
+  
+                    <div class="parking-icon">
+                      P
+                    </div>
+  
+  
+                    <div>
+  
+                      <strong>
+                        Slot
+                        {{
+                          parking.slotNumber
+                        }}
+                      </strong>
+  
+                      <span>
+                        Zone
+                        {{
+                          parking.zone
+                        }}
+                      </span>
+  
+                    </div>
+  
+  
+                    <strong class="price">
+  
+                      LKR
+                      {{
+                        parking.reservedFee
+                          | number:'1.0-2'
+                      }}
+  
+                    </strong>
+  
+                  </div>
+  
+                }
+  
+                @else {
+  
+                  <div class="no-parking">
+                    No parking reserved
+                  </div>
+  
+                }
+  
+              </section>
+  
+  
+              <!-- METHOD -->
+  
+              <section class="payment-card">
+  
+                <span class="section-kicker">
+                  PAYMENT METHOD
+                </span>
+  
+                <h2>
+                  Choose how to pay
+                </h2>
+  
+  
+                <div class="method-list">
+  
+                  @for (
+                    method
+                      of paymentMethods;
+                    track method.value
+                  ) {
+  
+                    <button
+                      type="button"
+  
+                      class="method-card"
+  
+                      [class.selected]="
+                        isPaymentMethodSelected(
+                          method.value
+                        )
+                      "
+  
+                      [disabled]="
+                        isPaying()
+                      "
+  
+                      (click)="
+                        selectPaymentMethod(
+                          method.value
+                        )
+                      "
+                    >
+  
+                      <div class="method-icon">
+                        {{ method.icon }}
+                      </div>
+  
+  
+                      <div class="method-content">
+  
+                        <strong>
+                          {{ method.title }}
+                        </strong>
+  
+                        <span>
+                          {{
+                            method.description
+                          }}
+                        </span>
+  
+                      </div>
+  
+  
+                      <span
+                        class="radio-circle"
+                      >
+                        @if (
+                          isPaymentMethodSelected(
+                            method.value
+                          )
+                        ) {
+                          ✓
+                        }
+                      </span>
+  
+                    </button>
+  
+                  }
+  
+                </div>
+  
+              </section>
+  
+            </main>
+  
+  
+            <!-- SUMMARY -->
+  
+            <aside class="payment-summary">
+  
+              <span class="section-kicker">
+                PAYMENT SUMMARY
+              </span>
+  
+              <h2>
+                Amount due
+              </h2>
+  
+  
+              <div class="summary-row">
+  
+                <span>
+                  Booking
+                </span>
+  
+                <strong>
+                  {{
+                    booking.bookingNumber
+                  }}
+                </strong>
+  
+              </div>
+  
+  
+              <div class="summary-row">
+  
+                <span>
+                  Seats
+                </span>
+  
+                <strong>
+                  {{
+                    booking.seats.length
+                  }}
+                </strong>
+  
+              </div>
+  
+  
+              <div class="summary-row">
+  
+                <span>
+                  Parking
+                </span>
+  
+                <strong>
+  
+                  @if (
+                    booking.parking
+                  ) {
+  
+                    Included
+  
+                  } @else {
+  
+                    None
+  
+                  }
+  
+                </strong>
+  
+              </div>
+  
+  
+              <div class="summary-divider"></div>
+  
+  
+              <div class="total-row">
+  
+                <div>
+  
+                  <span>
+                    Total Amount
+                  </span>
+  
+                  <small>
+                    Amount to be paid
+                  </small>
+  
+                </div>
+  
+  
+                <strong>
+                  LKR
+                  {{
+                    booking.totalAmount
+                      | number:'1.0-2'
+                  }}
+                </strong>
+  
+              </div>
+  
+  
+              <button
+                type="button"
+  
+                class="
+                  btn
+                  btn-primary
+                  pay-button
+                "
+  
+                [disabled]="
+                  isPaying()
+                  ||
+                  selectedPaymentMethod()
+                    ===
+                    PaymentMethod.NotSpecified
+                  ||
+                  booking.status !==
+                    BookingStatus.Pending
+                "
+  
+                (click)="payNow()"
+              >
+  
+                @if (
+                  isPaying()
+                ) {
+  
+                  <span
+                    class="button-spinner"
+                  ></span>
+  
+                  Processing Payment...
+  
+                }
+  
+                @else {
+  
+                  Pay LKR
+                  {{
+                    booking.totalAmount
+                      | number:'1.0-2'
+                  }}
+  
+                  <span>
+                    →
+                  </span>
+  
+                }
+  
+              </button>
+  
+  
+              <div class="security-list">
+  
+                <div>
+                  <span>✓</span>
+                  Secure transaction
+                </div>
+  
+                <div>
+                  <span>✓</span>
+                  Booking confirmation
+                </div>
+  
+                <div>
+                  <span>✓</span>
+                  Instant payment record
+                </div>
+  
+              </div>
+  
+  
+              <p class="payment-note">
+                Payment will confirm your
+                pending VenueFlow booking.
+              </p>
+  
+            </aside>
+  
+          </div>
+  
+        }
+  
+  
+        <!-- ==================================================
+             SUCCESS
+             ================================================== -->
+  
+        @else if (
+          paymentResult();
+          as payment
+        ) {
+  
+          <section class="success-card">
+  
+            <div class="success-icon">
+              ✓
+            </div>
+  
+  
+            <span class="success-kicker">
+              PAYMENT SUCCESSFUL
+            </span>
+  
+  
+            <h1>
+              Reservation confirmed
+            </h1>
+  
+  
+            <p>
+              Your VenueFlow payment was
+              completed successfully.
+            </p>
+  
+  
+            <div class="success-details">
+  
+              <div>
+  
+                <small>
+                  Booking Number
+                </small>
+  
+                <strong>
+                  {{
+                    booking.bookingNumber
+                  }}
+                </strong>
+  
+              </div>
+  
+  
+              <div>
+  
+                <small>
+                  Amount Paid
+                </small>
+  
+                <strong>
+                  LKR
+                  {{
+                    payment.amount
+                      | number:'1.0-2'
+                  }}
+                </strong>
+  
+              </div>
+  
+  
+              <div>
+  
+                <small>
+                  Transaction Reference
+                </small>
+  
+                <strong>
+                  {{
+                    payment.transactionReference
+                  }}
+                </strong>
+  
+              </div>
+  
+  
+              <div>
+  
+                <small>
+                  Paid At
+                </small>
+  
+                <strong>
+                  {{
+                    payment.createdAt
+                      | date:'MMM d, yyyy • h:mm a'
+                  }}
+                </strong>
+  
+              </div>
+  
+            </div>
+  
+  
+            <div class="success-actions">
+  
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="viewBooking()"
+              >
+                View Booking
+              </button>
+  
+  
+              <button
+                type="button"
+                class="btn btn-outline"
+                (click)="goToMyBookings()"
+              >
+                My Bookings
+              </button>
+  
+            </div>
+  
+          </section>
+  
+        }
+  
+      }
+  
+    </div>
+  
+  </section>

@@ -1,1 +1,745 @@
-<p>admin-parking works!</p>
+<section class="admin-parking-page">
+
+    <div class="container">
+  
+      @if (isLoading()) {
+  
+        <div class="state-card">
+  
+          <div class="spinner"></div>
+  
+          <h2>
+            Loading parking management...
+          </h2>
+  
+        </div>
+  
+      }
+  
+      @else if (!event()) {
+  
+        <div class="state-card">
+  
+          <div class="state-icon">
+            !
+          </div>
+  
+          <h2>
+            Parking management unavailable
+          </h2>
+  
+          <p>
+            {{ errorMessage() }}
+          </p>
+  
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="backToEvents()"
+          >
+            Back to Events
+          </button>
+  
+        </div>
+  
+      }
+  
+      @else if (
+        event();
+        as event
+      ) {
+  
+        <button
+          type="button"
+          class="back-button"
+          (click)="backToEvents()"
+        >
+          ← Back to Admin Events
+        </button>
+  
+  
+        <header class="page-header">
+  
+          <div>
+  
+            <span class="page-kicker">
+              VENUEFLOW ADMIN
+            </span>
+  
+            <h1>
+              Parking Management
+            </h1>
+  
+            <p>
+              Manage parking spaces for
+              <strong>
+                {{ event.name }}
+              </strong>.
+            </p>
+  
+          </div>
+  
+  
+          <div class="header-actions">
+  
+            <button
+              type="button"
+              class="btn btn-outline"
+              (click)="refresh()"
+            >
+              ↻ Refresh
+            </button>
+  
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="openCreateForm()"
+            >
+              + Add Parking Slot
+            </button>
+  
+          </div>
+  
+        </header>
+  
+  
+        <!-- EVENT -->
+  
+        <section class="event-strip">
+  
+          <div>
+  
+            <small>
+              EVENT
+            </small>
+  
+            <strong>
+              {{ event.name }}
+            </strong>
+  
+          </div>
+  
+  
+          <div>
+  
+            <small>
+              DATE
+            </small>
+  
+            <strong>
+              {{
+                event.startDateTime
+                  | date:'MMM d, yyyy • h:mm a'
+              }}
+            </strong>
+  
+          </div>
+  
+  
+          <div>
+  
+            <small>
+              VENUE
+            </small>
+  
+            <strong>
+              {{ event.venueName }}
+            </strong>
+  
+          </div>
+  
+  
+          <div>
+  
+            <small>
+              EVENT PARKING FEE
+            </small>
+  
+            <strong>
+              LKR
+              {{
+                event.parkingFee
+                  | number:'1.0-2'
+              }}
+            </strong>
+  
+          </div>
+  
+        </section>
+  
+  
+        <!-- STATS -->
+  
+        <section class="stats-grid">
+  
+          <article>
+  
+            <span>
+              Total Slots
+            </span>
+  
+            <strong>
+              {{ totalCount() }}
+            </strong>
+  
+          </article>
+  
+  
+          <article class="available">
+  
+            <span>
+              Available
+            </span>
+  
+            <strong>
+              {{ availableCount() }}
+            </strong>
+  
+          </article>
+  
+  
+          <article class="held">
+  
+            <span>
+              Held
+            </span>
+  
+            <strong>
+              {{ heldCount() }}
+            </strong>
+  
+          </article>
+  
+  
+          <article class="booked">
+  
+            <span>
+              Booked
+            </span>
+  
+            <strong>
+              {{ bookedCount() }}
+            </strong>
+  
+          </article>
+  
+  
+          <article class="unavailable">
+  
+            <span>
+              Unavailable
+            </span>
+  
+            <strong>
+              {{ unavailableCount() }}
+            </strong>
+  
+          </article>
+  
+        </section>
+  
+  
+        @if (successMessage()) {
+  
+          <div class="message success">
+            ✓ {{ successMessage() }}
+          </div>
+  
+        }
+  
+  
+        @if (errorMessage()) {
+  
+          <div class="message error">
+            ! {{ errorMessage() }}
+          </div>
+  
+        }
+  
+  
+        <!-- CREATE -->
+  
+        @if (showCreateForm()) {
+  
+          <section class="form-card">
+  
+            <div class="form-heading">
+  
+              <div>
+  
+                <span class="section-kicker">
+                  NEW PARKING SLOT
+                </span>
+  
+                <h2>
+                  Add parking slot
+                </h2>
+  
+              </div>
+  
+  
+              <button
+                type="button"
+                class="close-button"
+                (click)="closeCreateForm()"
+              >
+                ×
+              </button>
+  
+            </div>
+  
+  
+            <div class="form-grid">
+  
+              <label>
+  
+                <span>
+                  Slot Number *
+                </span>
+  
+                <input
+                  type="text"
+                  [(ngModel)]="createSlotNumber"
+                  placeholder="B1"
+                >
+  
+              </label>
+  
+  
+              <label>
+  
+                <span>
+                  Zone *
+                </span>
+  
+                <input
+                  type="text"
+                  [(ngModel)]="createZone"
+                  placeholder="B"
+                >
+  
+              </label>
+  
+  
+              <label>
+  
+                <span>
+                  Fee *
+                </span>
+  
+                <input
+                  type="number"
+                  min="0"
+                  [(ngModel)]="createFee"
+                  placeholder="500"
+                >
+  
+              </label>
+  
+            </div>
+  
+  
+            <div class="form-actions">
+  
+              <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="isSaving()"
+                (click)="closeCreateForm()"
+              >
+                Cancel
+              </button>
+  
+  
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="isSaving()"
+                (click)="createParkingSlot()"
+              >
+  
+                @if (isSaving()) {
+                  Creating...
+                } @else {
+                  Create Slot
+                }
+  
+              </button>
+  
+            </div>
+  
+          </section>
+  
+        }
+  
+  
+        <!-- EDIT -->
+  
+        @if (editingSlotId()) {
+  
+          <section class="form-card edit-card">
+  
+            <div class="form-heading">
+  
+              <div>
+  
+                <span class="section-kicker">
+                  EDIT PARKING SLOT
+                </span>
+  
+                <h2>
+                  Update parking slot
+                </h2>
+  
+              </div>
+  
+  
+              <button
+                type="button"
+                class="close-button"
+                (click)="cancelEdit()"
+              >
+                ×
+              </button>
+  
+            </div>
+  
+  
+            <div class="form-grid">
+  
+              <label>
+  
+                <span>
+                  Slot Number *
+                </span>
+  
+                <input
+                  type="text"
+                  [(ngModel)]="editSlotNumber"
+                >
+  
+              </label>
+  
+  
+              <label>
+  
+                <span>
+                  Zone *
+                </span>
+  
+                <input
+                  type="text"
+                  [(ngModel)]="editZone"
+                >
+  
+              </label>
+  
+  
+              <label>
+  
+                <span>
+                  Fee *
+                </span>
+  
+                <input
+                  type="number"
+                  min="0"
+                  [(ngModel)]="editFee"
+                >
+  
+              </label>
+  
+  
+              <label>
+  
+                <span>
+                  Status
+                </span>
+  
+                <select
+                  [(ngModel)]="editStatus"
+                >
+  
+                  <option
+                    [ngValue]="ParkingSlotStatus.Available"
+                  >
+                    Available
+                  </option>
+  
+                  <option
+                    [ngValue]="ParkingSlotStatus.Held"
+                  >
+                    Held
+                  </option>
+  
+                  <option
+                    [ngValue]="ParkingSlotStatus.Booked"
+                  >
+                    Booked
+                  </option>
+  
+                  <option
+                    [ngValue]="ParkingSlotStatus.Unavailable"
+                  >
+                    Unavailable
+                  </option>
+  
+                </select>
+  
+              </label>
+  
+            </div>
+  
+  
+            <div class="form-actions">
+  
+              <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="isSaving()"
+                (click)="cancelEdit()"
+              >
+                Cancel
+              </button>
+  
+  
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="isSaving()"
+                (click)="saveEdit()"
+              >
+  
+                @if (isSaving()) {
+                  Saving...
+                } @else {
+                  Save Changes
+                }
+  
+              </button>
+  
+            </div>
+  
+          </section>
+  
+        }
+  
+  
+        <!-- TABLE -->
+  
+        <section class="table-card">
+  
+          <div class="table-heading">
+  
+            <div>
+  
+              <span class="section-kicker">
+                PARKING INVENTORY
+              </span>
+  
+              <h2>
+                All parking slots
+              </h2>
+  
+            </div>
+  
+  
+            <span class="parking-count">
+              {{ totalCount() }}
+              slots
+            </span>
+  
+          </div>
+  
+  
+          @if (
+            parkingSlots().length === 0
+          ) {
+  
+            <div class="empty-state">
+  
+              <div>
+                P
+              </div>
+  
+              <h3>
+                No parking configured
+              </h3>
+  
+              <p>
+                Add the first parking slot
+                for this event.
+              </p>
+  
+            </div>
+  
+          }
+  
+          @else {
+  
+            <div class="table-wrapper">
+  
+              <table>
+  
+                <thead>
+  
+                  <tr>
+  
+                    <th>
+                      Slot
+                    </th>
+  
+                    <th>
+                      Zone
+                    </th>
+  
+                    <th>
+                      Fee
+                    </th>
+  
+                    <th>
+                      Status
+                    </th>
+  
+                    <th class="actions-cell">
+                      Actions
+                    </th>
+  
+                  </tr>
+  
+                </thead>
+  
+  
+                <tbody>
+  
+                  @for (
+                    slot of sortedSlots();
+                    track slot.id
+                  ) {
+  
+                    <tr>
+  
+                      <td>
+  
+                        <strong class="slot-number">
+                          {{ slot.slotNumber }}
+                        </strong>
+  
+                      </td>
+  
+  
+                      <td>
+                        {{ slot.zone }}
+                      </td>
+  
+  
+                      <td>
+  
+                        @if (
+                          slot.fee > 0
+                        ) {
+  
+                          LKR
+                          {{
+                            slot.fee
+                              | number:'1.0-2'
+                          }}
+  
+                        } @else {
+  
+                          FREE
+  
+                        }
+  
+                      </td>
+  
+  
+                      <td>
+  
+                        <span
+                          class="status-badge"
+  
+                          [class.available]="
+                            slot.status ===
+                            ParkingSlotStatus.Available
+                          "
+  
+                          [class.held]="
+                            slot.status ===
+                            ParkingSlotStatus.Held
+                          "
+  
+                          [class.booked]="
+                            slot.status ===
+                            ParkingSlotStatus.Booked
+                          "
+  
+                          [class.unavailable]="
+                            slot.status ===
+                            ParkingSlotStatus.Unavailable
+                          "
+                        >
+                          {{
+                            getStatusText(
+                              slot.status
+                            )
+                          }}
+                        </span>
+  
+                      </td>
+  
+  
+                      <td class="actions-cell">
+  
+                        <button
+                          type="button"
+                          class="table-button edit"
+                          [disabled]="isSaving()"
+                          (click)="startEdit(slot)"
+                        >
+                          Edit
+                        </button>
+  
+  
+                        <button
+                          type="button"
+                          class="table-button delete"
+  
+                          [disabled]="
+                            isSaving()
+                            ||
+                            slot.status ===
+                              ParkingSlotStatus.Booked
+                            ||
+                            slot.status ===
+                              ParkingSlotStatus.Held
+                          "
+  
+                          (click)="
+                            deleteParkingSlot(slot)
+                          "
+                        >
+                          Delete
+                        </button>
+  
+                      </td>
+  
+                    </tr>
+  
+                  }
+  
+                </tbody>
+  
+              </table>
+  
+            </div>
+  
+          }
+  
+        </section>
+  
+      }
+  
+    </div>
+  
+  </section>

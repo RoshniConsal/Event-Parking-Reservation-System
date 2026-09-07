@@ -1,1 +1,648 @@
-<p>booking-checkout works!</p>
+<section class="checkout-page">
+
+    <div class="container">
+  
+      @if (
+        bookingFlow.event();
+        as event
+      ) {
+  
+        <!-- BACK -->
+  
+        <button
+          type="button"
+          class="back-button"
+          (click)="editParking()"
+        >
+          ← Back to Parking
+        </button>
+  
+  
+        <!-- HEADER -->
+  
+        <header class="checkout-header">
+  
+          <div>
+  
+            <span class="page-kicker">
+              VENUEFLOW CHECKOUT
+            </span>
+  
+            <h1>
+              Review your reservation
+            </h1>
+  
+            <p>
+              Check your event, seats and
+              parking before creating the
+              booking.
+            </p>
+  
+          </div>
+  
+  
+          <div class="secure-badge">
+  
+            <span>
+              ✓
+            </span>
+  
+            Secure Checkout
+  
+          </div>
+  
+        </header>
+  
+  
+        <!-- PROGRESS -->
+  
+        <div class="progress-bar">
+  
+          <div class="progress-step complete">
+  
+            <span>
+              ✓
+            </span>
+  
+            <strong>
+              Seats
+            </strong>
+  
+          </div>
+  
+  
+          <div class="progress-line"></div>
+  
+  
+          <div class="progress-step complete">
+  
+            <span>
+              ✓
+            </span>
+  
+            <strong>
+              Parking
+            </strong>
+  
+          </div>
+  
+  
+          <div class="progress-line"></div>
+  
+  
+          <div class="progress-step active">
+  
+            <span>
+              3
+            </span>
+  
+            <strong>
+              Checkout
+            </strong>
+  
+          </div>
+  
+  
+          <div class="progress-line"></div>
+  
+  
+          <div class="progress-step">
+  
+            <span>
+              4
+            </span>
+  
+            <strong>
+              Payment
+            </strong>
+  
+          </div>
+  
+        </div>
+  
+  
+        <!-- ERROR -->
+  
+        @if (
+          errorMessage()
+        ) {
+  
+          <div class="error-banner">
+  
+            <div class="error-icon">
+              !
+            </div>
+  
+            <div>
+  
+              <strong>
+                Booking could not be created
+              </strong>
+  
+              <p>
+                {{ errorMessage() }}
+              </p>
+  
+            </div>
+  
+          </div>
+  
+        }
+  
+  
+        <!-- MAIN -->
+  
+        <div class="checkout-layout">
+  
+  
+          <!-- LEFT CONTENT -->
+  
+          <main class="checkout-content">
+  
+  
+            <!-- EVENT -->
+  
+            <section class="checkout-card">
+  
+              <div class="card-heading">
+  
+                <div>
+  
+                  <span class="section-kicker">
+                    EVENT
+                  </span>
+  
+                  <h2>
+                    Event details
+                  </h2>
+  
+                </div>
+  
+              </div>
+  
+  
+              <div class="event-summary">
+  
+                <div class="event-date">
+  
+                  <strong>
+                    {{
+                      event.startDateTime
+                        | date:'dd'
+                    }}
+                  </strong>
+  
+                  <span>
+                    {{
+                      event.startDateTime
+                        | date:'MMM'
+                    }}
+                  </span>
+  
+                </div>
+  
+  
+                <div class="event-details">
+  
+                  <h3>
+                    {{ event.name }}
+                  </h3>
+  
+                  <div>
+                    ◷
+                    {{
+                      event.startDateTime
+                        | date:'EEE, MMM d, yyyy • h:mm a'
+                    }}
+                  </div>
+  
+                  <div>
+                    ◆
+                    {{ event.venueName }}
+                  </div>
+  
+                  <span class="category">
+                    {{ event.categoryName }}
+                  </span>
+  
+                </div>
+  
+              </div>
+  
+            </section>
+  
+  
+            <!-- SEATS -->
+  
+            <section class="checkout-card">
+  
+              <div class="card-heading">
+  
+                <div>
+  
+                  <span class="section-kicker">
+                    SEATS
+                  </span>
+  
+                  <h2>
+                    Selected seats
+                  </h2>
+  
+                </div>
+  
+  
+                <button
+                  type="button"
+                  class="edit-button"
+                  (click)="editSeats()"
+                >
+                  Edit Seats
+                </button>
+  
+              </div>
+  
+  
+              <div class="seat-list">
+  
+                @for (
+                  seat of
+                    bookingFlow.selectedSeats();
+                  track seat.id
+                ) {
+  
+                  <div class="seat-item">
+  
+                    <div class="seat-icon">
+                      {{ seat.seatNumber }}
+                    </div>
+  
+  
+                    <div class="seat-info">
+  
+                      <strong>
+                        Seat
+                        {{ seat.seatNumber }}
+                      </strong>
+  
+                      <span>
+                        Row
+                        {{ seat.rowLabel }}
+                        •
+                        {{
+                          seat.seatType
+                          || 'Standard'
+                        }}
+                      </span>
+  
+                    </div>
+  
+  
+                    <strong class="item-price">
+  
+                      LKR
+  
+                      @if (
+                        seat.priceOverride !==
+                        null
+                      ) {
+  
+                        {{
+                          seat.priceOverride
+                            | number:'1.0-2'
+                        }}
+  
+                      } @else {
+  
+                        {{
+                          event.ticketPrice
+                            | number:'1.0-2'
+                        }}
+  
+                      }
+  
+                    </strong>
+  
+                  </div>
+  
+                }
+  
+              </div>
+  
+  
+              <div class="section-total">
+  
+                <span>
+                  {{
+                    bookingFlow
+                      .selectedSeatCount()
+                  }}
+                  seat(s)
+                </span>
+  
+                <strong>
+                  LKR
+                  {{
+                    bookingFlow
+                      .seatTotal()
+                      | number:'1.0-2'
+                  }}
+                </strong>
+  
+              </div>
+  
+            </section>
+  
+  
+            <!-- PARKING -->
+  
+            <section class="checkout-card">
+  
+              <div class="card-heading">
+  
+                <div>
+  
+                  <span class="section-kicker">
+                    PARKING
+                  </span>
+  
+                  <h2>
+                    Parking reservation
+                  </h2>
+  
+                </div>
+  
+  
+                <button
+                  type="button"
+                  class="edit-button"
+                  (click)="editParking()"
+                >
+                  Edit Parking
+                </button>
+  
+              </div>
+  
+  
+              @if (
+                bookingFlow
+                  .selectedParkingSlot();
+                as parking
+              ) {
+  
+                <div class="parking-summary">
+  
+                  <div class="parking-icon">
+                    P
+                  </div>
+  
+  
+                  <div class="parking-details">
+  
+                    <strong>
+                      Slot
+                      {{ parking.slotNumber }}
+                    </strong>
+  
+                    <span>
+                      Zone
+                      {{ parking.zone }}
+                    </span>
+  
+                  </div>
+  
+  
+                  <strong class="item-price">
+  
+                    @if (
+                      parking.fee > 0
+                    ) {
+  
+                      LKR
+                      {{
+                        parking.fee
+                          | number:'1.0-2'
+                      }}
+  
+                    } @else {
+  
+                      FREE
+  
+                    }
+  
+                  </strong>
+  
+                </div>
+  
+              }
+  
+              @else {
+  
+                <div class="no-parking">
+  
+                  <div class="parking-icon">
+                    P
+                  </div>
+  
+                  <div>
+  
+                    <strong>
+                      No parking selected
+                    </strong>
+  
+                    <p>
+                      You chose to continue
+                      without parking.
+                    </p>
+  
+                  </div>
+  
+                </div>
+  
+              }
+  
+            </section>
+  
+          </main>
+  
+  
+          <!-- RIGHT SUMMARY -->
+  
+          <aside class="order-summary">
+  
+            <span class="section-kicker">
+              ORDER SUMMARY
+            </span>
+  
+            <h2>
+              Payment overview
+            </h2>
+  
+  
+            <div class="summary-row">
+  
+              <span>
+                Tickets
+                (
+                {{
+                  bookingFlow
+                    .selectedSeatCount()
+                }}
+                )
+              </span>
+  
+              <strong>
+                LKR
+                {{
+                  bookingFlow
+                    .seatTotal()
+                    | number:'1.0-2'
+                }}
+              </strong>
+  
+            </div>
+  
+  
+            <div class="summary-row">
+  
+              <span>
+                Parking
+              </span>
+  
+              <strong>
+  
+                @if (
+                  bookingFlow
+                    .parkingTotal() > 0
+                ) {
+  
+                  LKR
+                  {{
+                    bookingFlow
+                      .parkingTotal()
+                      | number:'1.0-2'
+                  }}
+  
+                } @else {
+  
+                  FREE
+  
+                }
+  
+              </strong>
+  
+            </div>
+  
+  
+            <div class="summary-divider"></div>
+  
+  
+            <div class="grand-total">
+  
+              <div>
+  
+                <span>
+                  Total Amount
+                </span>
+  
+                <small>
+                  Final amount before payment
+                </small>
+  
+              </div>
+  
+              <strong>
+                LKR
+                {{
+                  bookingFlow
+                    .grandTotal()
+                    | number:'1.0-2'
+                }}
+              </strong>
+  
+            </div>
+  
+  
+            <button
+              type="button"
+  
+              class="
+                btn
+                btn-primary
+                confirm-button
+              "
+  
+              [disabled]="
+                isSubmitting()
+              "
+  
+              (click)="
+                confirmBooking()
+              "
+            >
+  
+              @if (
+                isSubmitting()
+              ) {
+  
+                <span class="button-spinner"></span>
+  
+                Creating Booking...
+  
+              }
+  
+              @else {
+  
+                Confirm Booking
+                <span>→</span>
+  
+              }
+  
+            </button>
+  
+  
+            <button
+              type="button"
+              class="cancel-button"
+              [disabled]="isSubmitting()"
+              (click)="cancelCheckout()"
+            >
+              Cancel Checkout
+            </button>
+  
+  
+            <div class="security-list">
+  
+              <div>
+                <span>✓</span>
+                Secure booking process
+              </div>
+  
+              <div>
+                <span>✓</span>
+                Real-time availability
+              </div>
+  
+              <div>
+                <span>✓</span>
+                Payment comes next
+              </div>
+  
+            </div>
+  
+  
+            <p class="summary-note">
+              Clicking Confirm Booking
+              creates a pending reservation.
+              Complete payment on the next
+              screen to confirm it.
+            </p>
+  
+          </aside>
+  
+        </div>
+  
+      }
+  
+    </div>
+  
+  </section>
