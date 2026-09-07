@@ -1,1 +1,669 @@
-<p>parking-selection works!</p>
+<section class="parking-page">
+
+    <div class="container">
+  
+  
+      <!-- LOADING -->
+  
+      @if (isLoading()) {
+  
+        <div class="state-card">
+  
+          <div class="spinner"></div>
+  
+          <h2>
+            Loading parking...
+          </h2>
+  
+          <p>
+            Checking available parking
+            spaces for your event.
+          </p>
+  
+        </div>
+  
+      }
+  
+  
+      <!-- ERROR -->
+  
+      @else if (errorMessage()) {
+  
+        <div class="state-card">
+  
+          <div class="state-icon">
+            !
+          </div>
+  
+          <h2>
+            Parking unavailable
+          </h2>
+  
+          <p>
+            {{ errorMessage() }}
+          </p>
+  
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="refreshParking()"
+          >
+            Try Again
+          </button>
+  
+        </div>
+  
+      }
+  
+  
+      <!-- CONTENT -->
+  
+      @else if (event(); as event) {
+  
+  
+        <!-- BACK -->
+  
+        <button
+          type="button"
+          class="back-button"
+          (click)="backToSeats()"
+        >
+          ← Back to Seats
+        </button>
+  
+  
+        <!-- HEADER -->
+  
+        <header class="parking-header">
+  
+          <div>
+  
+            <span class="page-kicker">
+              VENUEFLOW PARKING
+            </span>
+  
+            <h1>
+              Reserve your parking
+            </h1>
+  
+            <p>
+              Choose an available parking
+              space for
+              <strong>
+                {{ event.name }}
+              </strong>
+              or continue without parking.
+            </p>
+  
+          </div>
+  
+  
+          <div class="event-mini-card">
+  
+            <span>
+              {{
+                event.startDateTime
+                  | date:'dd'
+              }}
+            </span>
+  
+            <div>
+  
+              <strong>
+                {{
+                  event.startDateTime
+                    | date:'MMM yyyy'
+                }}
+              </strong>
+  
+              <small>
+                {{
+                  event.startDateTime
+                    | date:'h:mm a'
+                }}
+              </small>
+  
+            </div>
+  
+          </div>
+  
+        </header>
+  
+  
+        <!-- INFO BAR -->
+  
+        <section class="info-bar">
+  
+          <div>
+  
+            <small>
+              Venue
+            </small>
+  
+            <strong>
+              {{ event.venueName }}
+            </strong>
+  
+          </div>
+  
+  
+          <div>
+  
+            <small>
+              Selected Seats
+            </small>
+  
+            <strong>
+              {{
+                bookingFlow
+                  .selectedSeatCount()
+              }}
+            </strong>
+  
+          </div>
+  
+  
+          <div>
+  
+            <small>
+              Available Parking
+            </small>
+  
+            <strong>
+              {{ availableParkingCount() }}
+            </strong>
+  
+          </div>
+  
+        </section>
+  
+  
+        <!-- MAIN -->
+  
+        <div class="parking-layout">
+  
+  
+          <!-- PARKING MAP -->
+  
+          <main class="parking-card">
+  
+            <div class="parking-card-header">
+  
+              <div>
+  
+                <span class="section-kicker">
+                  PARKING MAP
+                </span>
+  
+                <h2>
+                  Choose a parking slot
+                </h2>
+  
+              </div>
+  
+  
+              <button
+                type="button"
+                class="refresh-button"
+                (click)="refreshParking()"
+              >
+                ↻ Refresh
+              </button>
+  
+            </div>
+  
+  
+            <!-- LEGEND -->
+  
+            <div class="legend">
+  
+              <div>
+                <span
+                  class="legend-box available"
+                ></span>
+                Available
+              </div>
+  
+              <div>
+                <span
+                  class="legend-box selected"
+                ></span>
+                Selected
+              </div>
+  
+              <div>
+                <span
+                  class="legend-box held"
+                ></span>
+                Held
+              </div>
+  
+              <div>
+                <span
+                  class="legend-box booked"
+                ></span>
+                Booked
+              </div>
+  
+            </div>
+  
+  
+            @if (
+              parkingSlots().length === 0
+            ) {
+  
+              <div class="empty-parking">
+  
+                <div>
+                  P
+                </div>
+  
+                <h3>
+                  No parking slots
+                </h3>
+  
+                <p>
+                  Parking is not configured
+                  for this event.
+                </p>
+  
+                <button
+                  type="button"
+                  class="btn btn-outline"
+                  (click)="skipParking()"
+                >
+                  Continue Without Parking
+                </button>
+  
+              </div>
+  
+            }
+  
+  
+            @else {
+  
+              <div class="parking-zones">
+  
+                @for (
+                  group of parkingZones();
+                  track group.zone
+                ) {
+  
+                  <section class="zone-section">
+  
+                    <div class="zone-heading">
+  
+                      <div>
+  
+                        <span>
+                          Zone
+                        </span>
+  
+                        <strong>
+                          {{ group.zone }}
+                        </strong>
+  
+                      </div>
+  
+                      <small>
+                        {{
+                          group.slots.length
+                        }}
+                        spaces
+                      </small>
+  
+                    </div>
+  
+  
+                    <div class="slot-grid">
+  
+                      @for (
+                        slot of group.slots;
+                        track slot.id
+                      ) {
+  
+                        <button
+                          type="button"
+  
+                          class="parking-slot"
+  
+                          [class.available]="
+                            slot.status ===
+                            ParkingSlotStatus.Available
+                          "
+  
+                          [class.selected]="
+                            isSelected(slot)
+                          "
+  
+                          [class.held]="
+                            slot.status ===
+                            ParkingSlotStatus.Held
+                          "
+  
+                          [class.booked]="
+                            slot.status ===
+                            ParkingSlotStatus.Booked
+                          "
+  
+                          [class.unavailable]="
+                            slot.status ===
+                            ParkingSlotStatus.Unavailable
+                          "
+  
+                          [disabled]="
+                            slot.status !==
+                            ParkingSlotStatus.Available
+                          "
+  
+                          (click)="
+                            selectParking(slot)
+                          "
+                        >
+  
+                          <div class="car-icon">
+                            P
+                          </div>
+  
+                          <strong>
+                            {{ slot.slotNumber }}
+                          </strong>
+  
+                          <span>
+                            Zone {{ slot.zone }}
+                          </span>
+  
+                          <small>
+                            {{
+                              getStatusText(slot)
+                            }}
+                          </small>
+  
+                          <div class="slot-price">
+  
+                            @if (
+                              slot.fee > 0
+                            ) {
+  
+                              LKR
+                              {{
+                                slot.fee
+                                  | number:'1.0-2'
+                              }}
+  
+                            } @else {
+  
+                              FREE
+  
+                            }
+  
+                          </div>
+  
+                        </button>
+  
+                      }
+  
+                    </div>
+  
+                  </section>
+  
+                }
+  
+              </div>
+  
+            }
+  
+          </main>
+  
+  
+          <!-- SUMMARY -->
+  
+          <aside class="summary-card">
+  
+            <span class="section-kicker">
+              BOOKING SUMMARY
+            </span>
+  
+            <h2>
+              Your reservation
+            </h2>
+  
+  
+            <!-- SEATS -->
+  
+            <div class="summary-section">
+  
+              <div class="summary-heading">
+  
+                <span>
+                  Seats
+                </span>
+  
+                <strong>
+                  {{
+                    bookingFlow
+                      .selectedSeatCount()
+                  }}
+                </strong>
+  
+              </div>
+  
+  
+              <div class="seat-tags">
+  
+                @for (
+                  seat of
+                    bookingFlow.selectedSeats();
+                  track seat.id
+                ) {
+  
+                  <span>
+                    {{ seat.seatNumber }}
+                  </span>
+  
+                }
+  
+              </div>
+  
+  
+              <div class="summary-price">
+  
+                <span>
+                  Seat Total
+                </span>
+  
+                <strong>
+                  LKR
+                  {{
+                    bookingFlow
+                      .seatTotal()
+                      | number:'1.0-2'
+                  }}
+                </strong>
+  
+              </div>
+  
+            </div>
+  
+  
+            <div class="divider"></div>
+  
+  
+            <!-- PARKING -->
+  
+            <div class="summary-section">
+  
+              <div class="summary-heading">
+  
+                <span>
+                  Parking
+                </span>
+  
+              </div>
+  
+  
+              @if (
+                bookingFlow
+                  .selectedParkingSlot();
+                as selectedParking
+              ) {
+  
+                <div class="selected-parking">
+  
+                  <div>
+  
+                    <small>
+                      Selected Slot
+                    </small>
+  
+                    <strong>
+                      {{
+                        selectedParking.slotNumber
+                      }}
+                    </strong>
+  
+                    <span>
+                      Zone
+                      {{
+                        selectedParking.zone
+                      }}
+                    </span>
+  
+                  </div>
+  
+  
+                  <button
+                    type="button"
+                    class="remove-button"
+                    (click)="
+                      bookingFlow
+                        .clearParking()
+                    "
+                  >
+                    ×
+                  </button>
+  
+                </div>
+  
+              }
+  
+              @else {
+  
+                <div class="no-parking">
+  
+                  No parking selected
+  
+                </div>
+  
+              }
+  
+  
+              <div class="summary-price">
+  
+                <span>
+                  Parking Fee
+                </span>
+  
+                <strong>
+                  LKR
+                  {{
+                    bookingFlow
+                      .parkingTotal()
+                      | number:'1.0-2'
+                  }}
+                </strong>
+  
+              </div>
+  
+            </div>
+  
+  
+            <div class="divider"></div>
+  
+  
+            <!-- TOTAL -->
+  
+            <div class="grand-total">
+  
+              <span>
+                Current Total
+              </span>
+  
+              <strong>
+                LKR
+                {{
+                  bookingFlow
+                    .grandTotal()
+                    | number:'1.0-2'
+                }}
+              </strong>
+  
+            </div>
+  
+  
+            @if (
+              bookingFlow
+                .hasSelectedParking()
+            ) {
+  
+              <button
+                type="button"
+                class="
+                  btn
+                  btn-primary
+                  continue-button
+                "
+                (click)="
+                  continueToCheckout()
+                "
+              >
+                Continue to Checkout
+                <span>→</span>
+              </button>
+  
+            }
+  
+  
+            @else {
+  
+              <button
+                type="button"
+                class="
+                  btn
+                  btn-primary
+                  continue-button
+                "
+                (click)="skipParking()"
+              >
+                Continue Without Parking
+                <span>→</span>
+              </button>
+  
+            }
+  
+  
+            <button
+              type="button"
+              class="skip-button"
+              (click)="backToSeats()"
+            >
+              Change Seats
+            </button>
+  
+  
+            <p class="note">
+              Parking is optional.
+              Your parking slot will be
+              included when the booking is
+              created.
+            </p>
+  
+          </aside>
+  
+        </div>
+  
+      }
+  
+    </div>
+  
+  </section>

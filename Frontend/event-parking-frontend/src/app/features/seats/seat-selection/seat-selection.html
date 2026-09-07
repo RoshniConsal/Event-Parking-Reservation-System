@@ -1,1 +1,569 @@
-<p>seat-selection works!</p>
+<section class="seat-page">
+
+    <div class="container">
+  
+  
+      <!-- ==================================================
+           LOADING
+           ================================================== -->
+  
+      @if (isLoading()) {
+  
+        <div class="state-card">
+  
+          <div class="spinner"></div>
+  
+          <h2>
+            Loading seats...
+          </h2>
+  
+          <p>
+            Checking the latest seat
+            availability.
+          </p>
+  
+        </div>
+  
+      }
+  
+  
+      <!-- ==================================================
+           ERROR
+           ================================================== -->
+  
+      @else if (errorMessage()) {
+  
+        <div class="state-card">
+  
+          <div class="state-icon error">
+            !
+          </div>
+  
+          <h2>
+            Seats unavailable
+          </h2>
+  
+          <p>
+            {{ errorMessage() }}
+          </p>
+  
+          <div class="state-actions">
+  
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="refreshSeats()"
+            >
+              Try Again
+            </button>
+  
+            <a
+              routerLink="/events"
+              class="btn btn-outline"
+            >
+              Browse Events
+            </a>
+  
+          </div>
+  
+        </div>
+  
+      }
+  
+  
+      <!-- ==================================================
+           CONTENT
+           ================================================== -->
+  
+      @else if (event(); as event) {
+  
+        <!-- BACK -->
+  
+        <button
+          type="button"
+          class="back-button"
+          (click)="backToEvent()"
+        >
+          ← Back to Event
+        </button>
+  
+  
+        <!-- HEADER -->
+  
+        <header class="seat-header">
+  
+          <div>
+  
+            <span class="page-kicker">
+              VENUEFLOW RESERVATION
+            </span>
+  
+            <h1>
+              Select your seats
+            </h1>
+  
+            <p>
+              Choose the seats you want
+              for
+              <strong>
+                {{ event.name }}
+              </strong>.
+            </p>
+  
+          </div>
+  
+  
+          <div class="event-mini-card">
+  
+            <span>
+              {{ event.startDateTime | date:'dd' }}
+            </span>
+  
+            <div>
+  
+              <strong>
+                {{ event.startDateTime | date:'MMM yyyy' }}
+              </strong>
+  
+              <small>
+                {{ event.startDateTime | date:'h:mm a' }}
+              </small>
+  
+            </div>
+  
+          </div>
+  
+        </header>
+  
+  
+        <!-- INFO -->
+  
+        <section class="event-info-bar">
+  
+          <div>
+  
+            <small>
+              Venue
+            </small>
+  
+            <strong>
+              {{ event.venueName }}
+            </strong>
+  
+          </div>
+  
+  
+          <div>
+  
+            <small>
+              Available Seats
+            </small>
+  
+            <strong>
+              {{ availableSeatCount() }}
+            </strong>
+  
+          </div>
+  
+  
+          <div>
+  
+            <small>
+              Base Ticket
+            </small>
+  
+            <strong>
+              LKR
+              {{
+                event.ticketPrice
+                  | number:'1.0-2'
+              }}
+            </strong>
+  
+          </div>
+  
+        </section>
+  
+  
+        <div class="seat-layout">
+  
+  
+          <!-- ==============================================
+               SEAT MAP
+               ============================================== -->
+  
+          <main class="seat-map-card">
+  
+            <div class="map-heading">
+  
+              <div>
+  
+                <span class="section-kicker">
+                  SEAT MAP
+                </span>
+  
+                <h2>
+                  Choose your place
+                </h2>
+  
+              </div>
+  
+  
+              <button
+                type="button"
+                class="refresh-button"
+                (click)="refreshSeats()"
+              >
+                ↻ Refresh
+              </button>
+  
+            </div>
+  
+  
+            <!-- LEGEND -->
+  
+            <div class="legend">
+  
+              <div>
+  
+                <span
+                  class="legend-seat available"
+                ></span>
+  
+                Available
+  
+              </div>
+  
+  
+              <div>
+  
+                <span
+                  class="legend-seat selected"
+                ></span>
+  
+                Selected
+  
+              </div>
+  
+  
+              <div>
+  
+                <span
+                  class="legend-seat held"
+                ></span>
+  
+                Held
+  
+              </div>
+  
+  
+              <div>
+  
+                <span
+                  class="legend-seat booked"
+                ></span>
+  
+                Booked
+  
+              </div>
+  
+            </div>
+  
+  
+            <!-- STAGE -->
+  
+            <div class="stage">
+  
+              <span>
+                EVENT STAGE
+              </span>
+  
+            </div>
+  
+  
+            <!-- NO SEATS -->
+  
+            @if (
+              seats().length === 0
+            ) {
+  
+              <div class="no-seats">
+  
+                <h3>
+                  No seats available
+                </h3>
+  
+                <p>
+                  Seat map has not been
+                  configured for this event.
+                </p>
+  
+              </div>
+  
+            }
+  
+  
+            <!-- SEAT ROWS -->
+  
+            @else {
+  
+              <div class="seat-rows">
+  
+                @for (
+                  row of seatRows();
+                  track row.rowLabel
+                ) {
+  
+                  <div class="seat-row">
+  
+                    <span class="row-label">
+                      {{ row.rowLabel }}
+                    </span>
+  
+  
+                    <div class="row-seats">
+  
+                      @for (
+                        seat of row.seats;
+                        track seat.id
+                      ) {
+  
+                        <button
+                          type="button"
+  
+                          class="seat"
+  
+                          [class.available]="
+                            seat.status ===
+                            SeatStatus.Available
+                          "
+  
+                          [class.selected]="
+                            isSelected(seat)
+                          "
+  
+                          [class.held]="
+                            seat.status ===
+                            SeatStatus.Held
+                          "
+  
+                          [class.booked]="
+                            seat.status ===
+                            SeatStatus.Booked
+                          "
+  
+                          [disabled]="
+                            seat.status !==
+                            SeatStatus.Available
+                          "
+  
+                          (click)="
+                            toggleSeat(seat)
+                          "
+  
+                          [title]="
+                            seat.seatNumber
+                            + ' - '
+                            + getSeatStatusText(seat)
+                          "
+                        >
+  
+                          <span>
+                            {{ seat.seatNumber }}
+                          </span>
+  
+                        </button>
+  
+                      }
+  
+                    </div>
+  
+                  </div>
+  
+                }
+  
+              </div>
+  
+            }
+  
+          </main>
+  
+  
+          <!-- ==============================================
+               SUMMARY
+               ============================================== -->
+  
+          <aside class="summary-card">
+  
+            <span class="section-kicker">
+              YOUR SELECTION
+            </span>
+  
+            <h2>
+              Reservation summary
+            </h2>
+  
+  
+            @if (
+              bookingFlow
+                .selectedSeats()
+                .length === 0
+            ) {
+  
+              <div class="empty-selection">
+  
+                <div>
+                  ◇
+                </div>
+  
+                <strong>
+                  No seats selected
+                </strong>
+  
+                <p>
+                  Select one or more
+                  available seats from the
+                  seat map.
+                </p>
+  
+              </div>
+  
+            }
+  
+            @else {
+  
+              <div class="selected-list">
+  
+                @for (
+                  seat of
+                    bookingFlow.selectedSeats();
+                  track seat.id
+                ) {
+  
+                  <div class="selected-item">
+  
+                    <div>
+  
+                      <strong>
+                        Seat
+                        {{ seat.seatNumber }}
+                      </strong>
+  
+                      <small>
+                        {{
+                          seat.seatType
+                          || 'Standard'
+                        }}
+                      </small>
+  
+                    </div>
+  
+  
+                    <div class="selected-price">
+  
+                      <strong>
+                        LKR
+                        {{
+                          getSeatPrice(seat)
+                            | number:'1.0-2'
+                        }}
+                      </strong>
+  
+  
+                      <button
+                        type="button"
+                        class="remove-seat"
+                        (click)="
+                          toggleSeat(seat)
+                        "
+                        aria-label="Remove seat"
+                      >
+                        ×
+                      </button>
+  
+                    </div>
+  
+                  </div>
+  
+                }
+  
+              </div>
+  
+            }
+  
+  
+            <div class="summary-divider"></div>
+  
+  
+            <div class="summary-row">
+  
+              <span>
+                Selected Seats
+              </span>
+  
+              <strong>
+                {{
+                  bookingFlow
+                    .selectedSeatCount()
+                }}
+              </strong>
+  
+            </div>
+  
+  
+            <div class="summary-row total">
+  
+              <span>
+                Seat Total
+              </span>
+  
+              <strong>
+                LKR
+                {{
+                  bookingFlow
+                    .seatTotal()
+                    | number:'1.0-2'
+                }}
+              </strong>
+  
+            </div>
+  
+  
+            <button
+              type="button"
+  
+              class="
+                btn
+                btn-primary
+                continue-button
+              "
+  
+              [disabled]="
+                !bookingFlow
+                  .hasSelectedSeats()
+              "
+  
+              (click)="
+                continueToParking()
+              "
+            >
+              Continue to Parking
+              <span>→</span>
+            </button>
+  
+  
+            <p class="summary-note">
+              Your selected seats will be
+              confirmed when the booking is
+              created.
+            </p>
+  
+          </aside>
+  
+        </div>
+  
+      }
+  
+    </div>
+  
+  </section>
