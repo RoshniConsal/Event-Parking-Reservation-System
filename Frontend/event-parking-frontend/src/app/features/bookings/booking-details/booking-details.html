@@ -1,1 +1,722 @@
-<p>booking-details works!</p>
+<section class="booking-details-page">
+
+  <div class="booking-details-container">
+
+    <!-- HEADER -->
+
+    <header class="page-header">
+
+      <div>
+
+        <span class="eyebrow">
+          VENUEFLOW RESERVATION
+        </span>
+
+        <h1>
+          Booking Details
+        </h1>
+
+        <p>
+          View your reservation,
+          seats, parking and payment information.
+        </p>
+
+      </div>
+
+
+      <a
+        routerLink="/customer/bookings"
+        class="back-button"
+      >
+        ← Back to My Bookings
+      </a>
+
+    </header>
+
+
+    <!-- SUCCESS MESSAGE -->
+
+    @if (successMessage()) {
+
+      <div class="success-message">
+
+        <span>✓</span>
+
+        <p>
+          {{ successMessage() }}
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- ERROR MESSAGE -->
+
+    @if (errorMessage()) {
+
+      <div class="error-message">
+
+        <span>!</span>
+
+        <div>
+
+          <p>
+            {{ errorMessage() }}
+          </p>
+
+          @if (booking()) {
+
+            <button
+              type="button"
+              (click)="
+                loadBooking(
+                  booking()!.id
+                )
+              "
+            >
+              Try Again
+            </button>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+
+    <!-- LOADING -->
+
+    @if (isLoading()) {
+
+      <div class="loading-card">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading booking details...
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- BOOKING DETAILS -->
+
+    @if (
+      !isLoading()
+      &&
+      booking();
+      as currentBooking
+    ) {
+
+      <article class="booking-card">
+
+
+        <!-- BOOKING TOP -->
+
+        <div class="booking-top">
+
+          <div>
+
+            <span class="booking-label">
+              BOOKING NUMBER
+            </span>
+
+            <h2>
+              {{ currentBooking.bookingNumber }}
+            </h2>
+
+            <p>
+              Created on
+              {{
+                currentBooking.createdAt
+                  | date:'medium'
+              }}
+            </p>
+
+          </div>
+
+
+          <span
+            class="status-badge"
+            [class]="
+              'status-badge '
+              +
+              statusClass(
+                currentBooking.status
+              )
+            "
+          >
+            {{
+              statusText(
+                currentBooking.status
+              )
+            }}
+          </span>
+
+        </div>
+
+
+        <!-- MAIN INFORMATION -->
+
+        <div class="main-info-grid">
+
+
+          <!-- EVENT -->
+
+          <section class="info-card event-card">
+
+            <div class="info-icon">
+              EV
+            </div>
+
+            <div>
+
+              <span class="info-label">
+                EVENT
+              </span>
+
+              <strong>
+                {{ currentBooking.eventName }}
+              </strong>
+
+              <small>
+                Event ID:
+                {{ currentBooking.eventId }}
+              </small>
+
+            </div>
+
+          </section>
+
+
+          <!-- CUSTOMER -->
+
+          <section class="info-card">
+
+            <div class="info-icon customer-icon">
+              CU
+            </div>
+
+            <div>
+
+              <span class="info-label">
+                CUSTOMER
+              </span>
+
+              <strong>
+                {{ currentBooking.customerName }}
+              </strong>
+
+              <small>
+                Customer ID:
+                {{ currentBooking.customerId }}
+              </small>
+
+            </div>
+
+          </section>
+
+
+          <!-- TOTAL -->
+
+          <section class="info-card">
+
+            <div class="info-icon amount-icon">
+              RS
+            </div>
+
+            <div>
+
+              <span class="info-label">
+                TOTAL AMOUNT
+              </span>
+
+              <strong>
+                LKR
+                {{
+                  currentBooking.totalAmount
+                    | number:'1.0-2'
+                }}
+              </strong>
+
+              <small>
+                Reservation total
+              </small>
+
+            </div>
+
+          </section>
+
+        </div>
+
+
+        <!-- SEATS -->
+
+        <section class="details-section">
+
+          <div class="section-heading">
+
+            <div>
+
+              <span class="section-eyebrow">
+                RESERVED
+              </span>
+
+              <h3>
+                Seats
+              </h3>
+
+            </div>
+
+            <span class="count-badge">
+              {{ currentBooking.seats.length }}
+              Seat{{
+                currentBooking.seats.length === 1
+                  ? ''
+                  : 's'
+              }}
+            </span>
+
+          </div>
+
+
+          @if (
+            currentBooking.seats.length > 0
+          ) {
+
+            <div class="seat-grid">
+
+              @for (
+                seat of currentBooking.seats;
+                track seat.seatId
+              ) {
+
+                <div class="seat-card">
+
+                  <div class="seat-number">
+                    {{ seat.seatNumber }}
+                  </div>
+
+                  <div class="seat-details">
+
+                    <span>
+                      {{ seat.seatType }}
+                    </span>
+
+                    <strong>
+                      LKR
+                      {{
+                        seat.priceAtBooking
+                          | number:'1.0-2'
+                      }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              }
+
+            </div>
+
+          }
+          @else {
+
+            <div class="empty-section">
+              No seats are attached
+              to this booking.
+            </div>
+
+          }
+
+        </section>
+
+
+        <!-- PARKING -->
+
+        <section class="details-section">
+
+          <div class="section-heading">
+
+            <div>
+
+              <span class="section-eyebrow">
+                OPTIONAL
+              </span>
+
+              <h3>
+                Parking
+              </h3>
+
+            </div>
+
+          </div>
+
+
+          @if (currentBooking.parking) {
+
+            <div class="parking-card">
+
+              <div class="parking-icon">
+                P
+              </div>
+
+              <div class="parking-info">
+
+                <div>
+
+                  <span>
+                    Parking Slot
+                  </span>
+
+                  <strong>
+                    {{
+                      currentBooking
+                        .parking
+                        .slotNumber
+                    }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Zone
+                  </span>
+
+                  <strong>
+                    {{
+                      currentBooking
+                        .parking
+                        .zone
+                    }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Parking Fee
+                  </span>
+
+                  <strong>
+                    LKR
+                    {{
+                      currentBooking
+                        .parking
+                        .reservedFee
+                        | number:'1.0-2'
+                    }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          }
+          @else {
+
+            <div class="empty-section">
+              No parking slot was selected
+              for this booking.
+            </div>
+
+          }
+
+        </section>
+
+
+        <!-- TIMELINE -->
+
+        <section class="details-section">
+
+          <div class="section-heading">
+
+            <div>
+
+              <span class="section-eyebrow">
+                HISTORY
+              </span>
+
+              <h3>
+                Booking Timeline
+              </h3>
+
+            </div>
+
+          </div>
+
+
+          <div class="timeline">
+
+
+            <div class="timeline-item active">
+
+              <div class="timeline-dot"></div>
+
+              <div>
+
+                <span>
+                  Booking Created
+                </span>
+
+                <strong>
+                  {{
+                    currentBooking.createdAt
+                      | date:'medium'
+                  }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            @if (
+              currentBooking.holdExpiresAt
+              &&
+              currentBooking.status ===
+                BookingStatus.Pending
+            ) {
+
+              <div class="timeline-item pending">
+
+                <div class="timeline-dot"></div>
+
+                <div>
+
+                  <span>
+                    Payment Hold Expires
+                  </span>
+
+                  <strong>
+                    {{
+                      currentBooking.holdExpiresAt
+                        | date:'medium'
+                    }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+            }
+
+
+            @if (
+              currentBooking.confirmedAt
+            ) {
+
+              <div class="timeline-item confirmed">
+
+                <div class="timeline-dot"></div>
+
+                <div>
+
+                  <span>
+                    Booking Confirmed
+                  </span>
+
+                  <strong>
+                    {{
+                      currentBooking.confirmedAt
+                        | date:'medium'
+                    }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+            }
+
+
+            @if (
+              currentBooking.cancelledAt
+            ) {
+
+              <div class="timeline-item cancelled">
+
+                <div class="timeline-dot"></div>
+
+                <div>
+
+                  <span>
+                    Booking Cancelled
+                  </span>
+
+                  <strong>
+                    {{
+                      currentBooking.cancelledAt
+                        | date:'medium'
+                    }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+        </section>
+
+
+        <!-- PENDING NOTICE -->
+
+        @if (
+          currentBooking.status ===
+          BookingStatus.Pending
+          &&
+          currentBooking.holdExpiresAt
+        ) {
+
+          <div class="hold-notice">
+
+            <strong>
+              Payment Pending
+            </strong>
+
+            <p>
+              Complete your payment before
+              {{
+                currentBooking.holdExpiresAt
+                  | date:'medium'
+              }}
+              to confirm this reservation.
+            </p>
+
+          </div>
+
+        }
+
+
+        <!-- ACTIONS -->
+
+        <footer class="booking-actions">
+
+          <a
+            routerLink="/customer/bookings"
+            class="secondary-button"
+          >
+            Back to My Bookings
+          </a>
+
+
+          @if (
+            canPay(
+              currentBooking
+            )
+          ) {
+
+            <a
+              [
+                routerLink
+              ]="
+                [
+                  '/customer/bookings',
+                  currentBooking.id,
+                  'payment'
+                ]
+              "
+              class="pay-button"
+            >
+              Pay Now
+            </a>
+
+          }
+
+
+          @if (
+            canCancel(
+              currentBooking
+            )
+          ) {
+
+            <button
+              type="button"
+              class="cancel-button"
+
+              [disabled]="
+                isCancelling()
+              "
+
+              (click)="
+                cancelBooking()
+              "
+            >
+
+              @if (
+                isCancelling()
+              ) {
+
+                Cancelling...
+
+              }
+              @else {
+
+                Cancel Booking
+
+              }
+
+            </button>
+
+          }
+
+        </footer>
+
+      </article>
+
+    }
+
+
+    <!-- NO BOOKING -->
+
+    @if (
+      !isLoading()
+      &&
+      !booking()
+      &&
+      !errorMessage()
+    ) {
+
+      <div class="empty-booking">
+
+        <div class="empty-icon">
+          BK
+        </div>
+
+        <h2>
+          Booking not available
+        </h2>
+
+        <p>
+          This booking could not be displayed.
+        </p>
+
+        <a
+          routerLink="/customer/bookings"
+          class="primary-button"
+        >
+          Go to My Bookings
+        </a>
+
+      </div>
+
+    }
+
+  </div>
+
+</section>
