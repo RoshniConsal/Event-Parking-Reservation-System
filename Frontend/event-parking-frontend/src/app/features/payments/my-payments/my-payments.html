@@ -1,1 +1,409 @@
-<p>my-payments works!</p>
+<section class="payments-page">
+
+  <div class="payments-container">
+
+    <!-- HEADER -->
+
+    <header class="page-header">
+
+      <div>
+
+        <span class="eyebrow">
+          PAYMENT HISTORY
+        </span>
+
+        <h1>
+          My Payments
+        </h1>
+
+        <p>
+          View and track all payments made
+          for your VenueFlow reservations.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadPayments()"
+      >
+        Refresh
+      </button>
+
+    </header>
+
+
+    <!-- SUMMARY -->
+
+    <section class="summary-grid">
+
+      <div class="summary-card">
+        <span>Total Payments</span>
+        <strong>
+          {{ totalPayments() }}
+        </strong>
+      </div>
+
+
+      <div class="summary-card completed-summary">
+        <span>Completed</span>
+        <strong>
+          {{ completedPayments() }}
+        </strong>
+      </div>
+
+
+      <div class="summary-card pending-summary">
+        <span>Pending</span>
+        <strong>
+          {{ pendingPayments() }}
+        </strong>
+      </div>
+
+
+      <div class="summary-card amount-summary">
+        <span>Total Paid</span>
+        <strong>
+          LKR
+          {{
+            totalPaid()
+              | number:'1.0-2'
+          }}
+        </strong>
+      </div>
+
+    </section>
+
+
+    <!-- FILTERS -->
+
+    <div class="toolbar">
+
+      <div class="filter-group">
+
+        <button
+          type="button"
+          [class.active]="
+            selectedStatus() === 0
+          "
+          (click)="
+            setStatusFilter(0)
+          "
+        >
+          All
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            selectedStatus() ===
+            PaymentStatus.Completed
+          "
+          (click)="
+            setStatusFilter(
+              PaymentStatus.Completed
+            )
+          "
+        >
+          Completed
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            selectedStatus() ===
+            PaymentStatus.Pending
+          "
+          (click)="
+            setStatusFilter(
+              PaymentStatus.Pending
+            )
+          "
+        >
+          Pending
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ERROR -->
+
+    @if (errorMessage()) {
+
+      <div class="error-message">
+
+        <span>!</span>
+
+        <div>
+
+          <p>
+            {{ errorMessage() }}
+          </p>
+
+          <button
+            type="button"
+            (click)="loadPayments()"
+          >
+            Try Again
+          </button>
+
+        </div>
+
+      </div>
+
+    }
+
+
+    <!-- LOADING -->
+
+    @if (isLoading()) {
+
+      <div class="loading-card">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading your payments...
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- PAYMENT LIST -->
+
+    @if (
+      !isLoading()
+      &&
+      !errorMessage()
+    ) {
+
+      @if (
+        payments().length === 0
+      ) {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            PM
+          </div>
+
+          <h2>
+            No payments yet
+          </h2>
+
+          <p>
+            Once you complete a reservation payment,
+            it will appear here.
+          </p>
+
+        </div>
+
+      }
+
+      @else if (
+        filteredPayments().length === 0
+      ) {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            FL
+          </div>
+
+          <h2>
+            No matching payments
+          </h2>
+
+          <p>
+            There are no payments for
+            the selected status.
+          </p>
+
+          <button
+            type="button"
+            class="clear-filter-button"
+            (click)="setStatusFilter(0)"
+          >
+            Show All Payments
+          </button>
+
+        </div>
+
+      }
+
+      @else {
+
+        <div class="payment-list">
+
+          @for (
+            payment of filteredPayments();
+            track payment.id
+          ) {
+
+            <article class="payment-card">
+
+              <div class="payment-top">
+
+                <div>
+
+                  <span class="payment-label">
+                    TRANSACTION REFERENCE
+                  </span>
+
+                  <h2>
+                    {{
+                      payment.transactionReference
+                    }}
+                  </h2>
+
+                  <p>
+                    {{
+                      payment.createdAt
+                        | date:'medium'
+                    }}
+                  </p>
+
+                </div>
+
+
+                <span
+                  class="status-badge"
+                  [class]="
+                    'status-badge '
+                    +
+                    statusClass(
+                      payment.status
+                    )
+                  "
+                >
+                  {{
+                    statusText(
+                      payment.status
+                    )
+                  }}
+                </span>
+
+              </div>
+
+
+              <div class="payment-content">
+
+
+                <!-- METHOD -->
+
+                <div class="method-section">
+
+                  <div class="method-icon">
+                    {{
+                      paymentMethodShort(
+                        payment.paymentMethod
+                      )
+                    }}
+                  </div>
+
+                  <div>
+
+                    <span>
+                      Payment Method
+                    </span>
+
+                    <strong>
+                      {{
+                        paymentMethodText(
+                          payment.paymentMethod
+                        )
+                      }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <!-- INFO -->
+
+                <div class="details-grid">
+
+                  <div class="detail-item">
+
+                    <span>
+                      Booking Number
+                    </span>
+
+                    <strong>
+                      {{
+                        payment.bookingNumber
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <div class="detail-item">
+
+                    <span>
+                      Amount
+                    </span>
+
+                    <strong>
+                      LKR
+                      {{
+                        payment.amount
+                          | number:'1.0-2'
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <div class="detail-item">
+
+                    <span>
+                      Customer
+                    </span>
+
+                    <strong>
+                      {{
+                        payment.customerName
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <div class="detail-item">
+
+                    <span>
+                      Payment ID
+                    </span>
+
+                    <strong>
+                      #{{ payment.id }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    }
+
+  </div>
+
+</section>
