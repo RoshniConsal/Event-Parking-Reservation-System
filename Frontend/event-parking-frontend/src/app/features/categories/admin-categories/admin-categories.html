@@ -1,1 +1,349 @@
-<p>admin-categories works!</p>
+<section class="admin-categories-page">
+
+  <div class="container">
+
+    <header class="page-header">
+
+      <div>
+
+        <span class="eyebrow">
+          CATEGORY MANAGEMENT
+        </span>
+
+        <h1>
+          Manage Categories
+        </h1>
+
+        <p>
+          Create, update and manage event categories in VenueFlow.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadCategories()"
+        [disabled]="isLoading()"
+      >
+        Refresh
+      </button>
+
+    </header>
+
+
+    @if (successMessage()) {
+
+      <div class="success-message">
+        {{ successMessage() }}
+      </div>
+
+    }
+
+
+    @if (errorMessage()) {
+
+      <div class="error-message">
+        {{ errorMessage() }}
+      </div>
+
+    }
+
+
+    <section class="form-card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-kicker">
+            {{
+              editingCategoryId() === null
+                ? 'CREATE CATEGORY'
+                : 'EDIT CATEGORY'
+            }}
+          </span>
+
+          <h2>
+            {{
+              editingCategoryId() === null
+                ? 'Add New Category'
+                : 'Update Category'
+            }}
+          </h2>
+
+        </div>
+
+        @if (
+          editingCategoryId() !== null
+        ) {
+
+          <button
+            type="button"
+            class="cancel-button"
+            (click)="cancelEdit()"
+          >
+            Cancel Edit
+          </button>
+
+        }
+
+      </div>
+
+
+      <form
+        [formGroup]="categoryForm"
+        (ngSubmit)="saveCategory()"
+      >
+
+        <div class="form-grid">
+
+          <div class="form-field">
+
+            <label for="categoryName">
+              Category Name
+            </label>
+
+            <input
+              id="categoryName"
+              type="text"
+              formControlName="name"
+              placeholder="Example: Technology"
+            />
+
+            @if (
+              categoryForm.controls.name.touched &&
+              categoryForm.controls.name.invalid
+            ) {
+
+              <small class="validation-error">
+
+                @if (
+                  categoryForm.controls.name.errors?.['required']
+                ) {
+                  Category name is required.
+                }
+
+                @else if (
+                  categoryForm.controls.name.errors?.['maxlength']
+                ) {
+                  Category name is too long.
+                }
+
+              </small>
+
+            }
+
+          </div>
+
+
+          <div class="form-field full-width">
+
+            <label for="description">
+              Description
+            </label>
+
+            <textarea
+              id="description"
+              rows="4"
+              formControlName="description"
+              placeholder="Enter a short category description"
+            ></textarea>
+
+            @if (
+              categoryForm.controls.description.touched &&
+              categoryForm.controls.description.invalid
+            ) {
+
+              <small class="validation-error">
+                Description is too long.
+              </small>
+
+            }
+
+          </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button
+            type="submit"
+            class="save-button"
+            [disabled]="isSaving()"
+          >
+
+            @if (isSaving()) {
+
+              Saving...
+
+            }
+
+            @else {
+
+              {{
+                editingCategoryId() === null
+                  ? 'Create Category'
+                  : 'Update Category'
+              }}
+
+            }
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <section class="categories-card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-kicker">
+            CATEGORIES
+          </span>
+
+          <h2>
+            Category List
+          </h2>
+
+        </div>
+
+        <span class="category-count">
+          {{ categories().length }}
+          categories
+        </span>
+
+      </div>
+
+
+      @if (isLoading()) {
+
+        <div class="loading-card">
+
+          <div class="spinner"></div>
+
+          <p>
+            Loading categories...
+          </p>
+
+        </div>
+
+      }
+
+
+      @else if (
+        categories().length === 0
+      ) {
+
+        <div class="empty-state">
+
+          <h3>
+            No categories found
+          </h3>
+
+          <p>
+            Create your first category using the form above.
+          </p>
+
+        </div>
+
+      }
+
+
+      @else {
+
+        <div class="category-grid">
+
+          @for (
+            category of categories();
+            track category.id
+          ) {
+
+            <article class="category-card">
+
+              <div class="category-top">
+
+                <div>
+
+                  <span class="category-id">
+                    #{{ category.id }}
+                  </span>
+
+                  <h3>
+                    {{ category.name }}
+                  </h3>
+
+                </div>
+
+                <div class="row-actions">
+
+                  <button
+                    type="button"
+                    class="edit-button"
+                    (click)="editCategory(category)"
+                    [disabled]="
+                      deletingId() === category.id
+                    "
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    type="button"
+                    class="delete-button"
+                    (click)="deleteCategory(category)"
+                    [disabled]="
+                      deletingId() === category.id
+                    "
+                  >
+
+                    @if (
+                      deletingId() === category.id
+                    ) {
+
+                      Deleting...
+
+                    }
+
+                    @else {
+
+                      Delete
+
+                    }
+
+                  </button>
+
+                </div>
+
+              </div>
+
+
+              <p class="category-description">
+
+                {{
+                  category.description
+                    || 'No description provided.'
+                }}
+
+              </p>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+  </div>
+
+</section>
