@@ -1,1 +1,537 @@
-<p>admin-dashboard works!</p>
+<section class="admin-dashboard-page">
+
+  <div class="container">
+
+
+    <header class="page-header">
+
+      <div>
+
+        <span class="eyebrow">
+          ADMIN CONTROL CENTER
+        </span>
+
+        <h1>
+          Welcome,
+          {{ authState.fullName() || 'Administrator' }}
+        </h1>
+
+        <p>
+          Monitor VenueFlow operations,
+          reservations, revenue,
+          seats and parking from one place.
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadDashboard()"
+        [disabled]="isLoading()"
+      >
+        Refresh
+      </button>
+
+    </header>
+
+
+    @if (errorMessage()) {
+
+      <div class="error-card">
+
+        <div class="error-icon">
+          !
+        </div>
+
+        <div>
+
+          <h2>
+            Unable to load dashboard
+          </h2>
+
+          <p>
+            {{ errorMessage() }}
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="retry-button"
+          (click)="loadDashboard()"
+        >
+          Try Again
+        </button>
+
+      </div>
+
+    }
+
+
+    @if (isLoading()) {
+
+      <div class="loading-card">
+
+        <div class="spinner"></div>
+
+        <h2>
+          Loading admin dashboard...
+        </h2>
+
+        <p>
+          Fetching the latest VenueFlow data.
+        </p>
+
+      </div>
+
+    }
+
+
+    @else if (dashboard(); as data) {
+
+      <section class="overview-grid">
+
+        <article class="stat-card">
+
+          <span class="stat-label">
+            Total Customers
+          </span>
+
+          <strong>
+            {{ data.totalCustomers | number }}
+          </strong>
+
+          <a routerLink="/admin/customers">
+            Manage Customers →
+          </a>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <span class="stat-label">
+            Total Venues
+          </span>
+
+          <strong>
+            {{ data.totalVenues | number }}
+          </strong>
+
+          <a routerLink="/admin/venues">
+            Manage Venues →
+          </a>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <span class="stat-label">
+            Total Categories
+          </span>
+
+          <strong>
+            {{ data.totalCategories | number }}
+          </strong>
+
+          <a routerLink="/admin/categories">
+            Manage Categories →
+          </a>
+
+        </article>
+
+
+        <article class="stat-card highlight-card">
+
+          <span class="stat-label">
+            Total Revenue
+          </span>
+
+          <strong>
+            LKR
+            {{ data.totalRevenue | number:'1.0-2' }}
+          </strong>
+
+          <a routerLink="/admin/payments">
+            View Payments →
+          </a>
+
+        </article>
+
+      </section>
+
+
+      <section class="dashboard-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              EVENTS
+            </span>
+
+            <h2>
+              Event overview
+            </h2>
+
+          </div>
+
+          <a
+            routerLink="/admin/events"
+            class="section-link"
+          >
+            Manage Events
+          </a>
+
+        </div>
+
+
+        <div class="metric-grid">
+
+          <div class="metric-box">
+
+            <span>
+              Total Events
+            </span>
+
+            <strong>
+              {{ data.totalEvents | number }}
+            </strong>
+
+          </div>
+
+
+          <div class="metric-box success">
+
+            <span>
+              Upcoming Events
+            </span>
+
+            <strong>
+              {{ data.upcomingEvents | number }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <section class="dashboard-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              BOOKINGS
+            </span>
+
+            <h2>
+              Booking status
+            </h2>
+
+          </div>
+
+          <a
+            routerLink="/admin/bookings"
+            class="section-link"
+          >
+            Manage Bookings
+          </a>
+
+        </div>
+
+
+        <div class="metric-grid booking-grid">
+
+          <div class="metric-box">
+
+            <span>
+              Total
+            </span>
+
+            <strong>
+              {{ data.totalBookings | number }}
+            </strong>
+
+          </div>
+
+
+          <div class="metric-box warning">
+
+            <span>
+              Pending
+            </span>
+
+            <strong>
+              {{ data.pendingBookings | number }}
+            </strong>
+
+          </div>
+
+
+          <div class="metric-box success">
+
+            <span>
+              Confirmed
+            </span>
+
+            <strong>
+              {{ data.confirmedBookings | number }}
+            </strong>
+
+          </div>
+
+
+          <div class="metric-box danger">
+
+            <span>
+              Cancelled
+            </span>
+
+            <strong>
+              {{ data.cancelledBookings | number }}
+            </strong>
+
+          </div>
+
+
+          <div class="metric-box muted">
+
+            <span>
+              Expired
+            </span>
+
+            <strong>
+              {{ data.expiredBookings | number }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <div class="resource-grid">
+
+
+        <section class="dashboard-section">
+
+          <div class="section-heading">
+
+            <div>
+
+              <span class="section-kicker">
+                SEATING
+              </span>
+
+              <h2>
+                Seat availability
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div class="resource-list">
+
+            <div>
+
+              <span>
+                Available
+              </span>
+
+              <strong class="success-text">
+                {{ data.availableSeats | number }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Held
+              </span>
+
+              <strong class="warning-text">
+                {{ data.heldSeats | number }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Booked
+              </span>
+
+              <strong>
+                {{ data.bookedSeats | number }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section class="dashboard-section">
+
+          <div class="section-heading">
+
+            <div>
+
+              <span class="section-kicker">
+                PARKING
+              </span>
+
+              <h2>
+                Parking availability
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div class="resource-list">
+
+            <div>
+
+              <span>
+                Available
+              </span>
+
+              <strong class="success-text">
+                {{ data.availableParkingSlots | number }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Held
+              </span>
+
+              <strong class="warning-text">
+                {{ data.heldParkingSlots | number }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Booked
+              </span>
+
+              <strong>
+                {{ data.bookedParkingSlots | number }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Unavailable
+              </span>
+
+              <strong class="danger-text">
+                {{ data.unavailableParkingSlots | number }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <section class="quick-actions">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              QUICK ACTIONS
+            </span>
+
+            <h2>
+              Administration
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="action-grid">
+
+          <a routerLink="/admin/events">
+            Events
+          </a>
+
+          <a routerLink="/admin/venues">
+            Venues
+          </a>
+
+          <a routerLink="/admin/categories">
+            Categories
+          </a>
+
+          <a routerLink="/admin/customers">
+            Customers
+          </a>
+
+          <a routerLink="/admin/bookings">
+            Bookings
+          </a>
+
+          <a routerLink="/admin/payments">
+            Payments
+          </a>
+
+          <a routerLink="/admin/notifications">
+            Notifications
+          </a>
+
+        </div>
+
+      </section>
+
+
+      <footer class="generated-time">
+
+        Last updated:
+
+        {{
+          data.generatedAtUtc
+            | date:'medium'
+        }}
+
+      </footer>
+
+    }
+
+  </div>
+
+</section>
