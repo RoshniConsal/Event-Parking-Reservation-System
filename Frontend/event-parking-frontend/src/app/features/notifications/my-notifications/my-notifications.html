@@ -1,1 +1,375 @@
-<p>my-notifications works!</p>
+<section class="notifications-page">
+
+  <div class="notifications-container">
+
+    <!-- HEADER -->
+
+    <header class="page-header">
+
+      <div>
+
+        <span class="eyebrow">
+          NOTIFICATION CENTER
+        </span>
+
+        <h1>
+          My Notifications
+        </h1>
+
+        <p>
+          Stay updated with booking,
+          payment and event notifications.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadNotifications()"
+      >
+        Refresh
+      </button>
+
+    </header>
+
+
+    <!-- SUMMARY -->
+
+    <section class="summary-grid">
+
+      <div class="summary-card">
+        <span>Total</span>
+        <strong>
+          {{ totalNotifications() }}
+        </strong>
+      </div>
+
+
+      <div class="summary-card unread-summary">
+        <span>Unread</span>
+        <strong>
+          {{ unreadNotifications() }}
+        </strong>
+      </div>
+
+
+      <div class="summary-card read-summary">
+        <span>Read</span>
+        <strong>
+          {{ readNotifications() }}
+        </strong>
+      </div>
+
+    </section>
+
+
+    <!-- FILTERS -->
+
+    <div class="toolbar">
+
+      <div class="filter-group">
+
+        <button
+          type="button"
+          [class.active]="
+            unreadOnly() === false
+          "
+          (click)="
+            setUnreadOnly(false)
+          "
+        >
+          All
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            unreadOnly() === true
+          "
+          (click)="
+            setUnreadOnly(true)
+          "
+        >
+          Unread Only
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ERROR -->
+
+    @if (errorMessage()) {
+
+      <div class="error-message">
+
+        <span>!</span>
+
+        <div>
+
+          <p>
+            {{ errorMessage() }}
+          </p>
+
+          <button
+            type="button"
+            (click)="loadNotifications()"
+          >
+            Try Again
+          </button>
+
+        </div>
+
+      </div>
+
+    }
+
+
+    <!-- LOADING -->
+
+    @if (isLoading()) {
+
+      <div class="loading-card">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading notifications...
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- LIST -->
+
+    @if (
+      !isLoading()
+      &&
+      !errorMessage()
+    ) {
+
+      @if (
+        notifications().length === 0
+      ) {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            NT
+          </div>
+
+          <h2>
+            No notifications
+          </h2>
+
+          <p>
+            @if (unreadOnly()) {
+              You have no unread notifications.
+            }
+            @else {
+              Your notifications will appear here.
+            }
+          </p>
+
+          @if (unreadOnly()) {
+
+            <button
+              type="button"
+              class="show-all-button"
+              (click)="
+                setUnreadOnly(false)
+              "
+            >
+              Show All Notifications
+            </button>
+
+          }
+
+        </div>
+
+      }
+
+      @else {
+
+        <div class="notification-list">
+
+          @for (
+            notification of notifications();
+            track notification.id
+          ) {
+
+            <article
+              class="notification-card"
+
+              [class.unread]="
+                !notification.isRead
+              "
+
+              [class.read]="
+                notification.isRead
+              "
+            >
+
+              <div
+                class="notification-icon"
+
+                [class]="
+                  'notification-icon '
+                  +
+                  typeClass(
+                    notification.type
+                  )
+                "
+              >
+                {{
+                  typeShort(
+                    notification.type
+                  )
+                }}
+              </div>
+
+
+              <div class="notification-content">
+
+                <div class="notification-top">
+
+                  <div>
+
+                    <span class="notification-type">
+                      {{
+                        typeText(
+                          notification.type
+                        )
+                      }}
+                    </span>
+
+                    <h2>
+                      {{ notification.title }}
+                    </h2>
+
+                  </div>
+
+
+                  @if (
+                    !notification.isRead
+                  ) {
+
+                    <span class="unread-badge">
+                      New
+                    </span>
+
+                  }
+                  @else {
+
+                    <span class="read-badge">
+                      Read
+                    </span>
+
+                  }
+
+                </div>
+
+
+                <p class="notification-message">
+                  {{ notification.message }}
+                </p>
+
+
+                <div class="notification-meta">
+
+                  <span>
+                    {{
+                      notification.createdAt
+                        | date:'medium'
+                    }}
+                  </span>
+
+
+                  @if (
+                    notification.bookingId
+                  ) {
+
+                    <span>
+                      Booking ID:
+                      #{{ notification.bookingId }}
+                    </span>
+
+                  }
+
+
+                  @if (
+                    notification.eventId
+                  ) {
+
+                    <span>
+                      Event ID:
+                      #{{ notification.eventId }}
+                    </span>
+
+                  }
+
+                </div>
+
+
+                @if (
+                  !notification.isRead
+                ) {
+
+                  <div class="notification-actions">
+
+                    <button
+                      type="button"
+                      class="mark-read-button"
+
+                      [disabled]="
+                        updatingNotificationId() ===
+                        notification.id
+                      "
+
+                      (click)="
+                        markAsRead(
+                          notification
+                        )
+                      "
+                    >
+
+                      @if (
+                        updatingNotificationId() ===
+                        notification.id
+                      ) {
+
+                        Marking...
+
+                      }
+                      @else {
+
+                        Mark as Read
+
+                      }
+
+                    </button>
+
+                  </div>
+
+                }
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    }
+
+  </div>
+
+</section>
