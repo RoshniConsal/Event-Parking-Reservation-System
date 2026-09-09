@@ -1,7 +1,7 @@
 <app-navbar
   brand="VenueFlow"
   [items]="navItems"
-  [showLogin]="true">
+  [showLogin]="!authState.isAuthenticated()">
 </app-navbar>
 
 <main class="layout-content">

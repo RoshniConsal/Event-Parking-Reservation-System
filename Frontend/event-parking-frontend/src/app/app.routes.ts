@@ -20,6 +20,7 @@ import {
   roleGuard
 } from './core/guards/role-guard';
 
+
 export const routes: Routes = [
 
   // =====================================================
@@ -33,7 +34,7 @@ export const routes: Routes = [
 
       {
         path: '',
-        title: 'EventPark | Home',
+        title: 'VenueFlow | Home',
 
         loadComponent: () =>
           import('./features/home/home')
@@ -42,7 +43,7 @@ export const routes: Routes = [
 
       {
         path: 'events',
-        title: 'Events | EventPark',
+        title: 'Events | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -54,7 +55,7 @@ export const routes: Routes = [
 
       {
         path: 'events/:id',
-        title: 'Event Details | EventPark',
+        title: 'Event Details | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -66,7 +67,7 @@ export const routes: Routes = [
 
       {
         path: 'login',
-        title: 'Login | EventPark',
+        title: 'Login | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -78,7 +79,7 @@ export const routes: Routes = [
 
       {
         path: 'register',
-        title: 'Register | EventPark',
+        title: 'Register | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -90,7 +91,7 @@ export const routes: Routes = [
 
       {
         path: 'verify-email',
-        title: 'Verify Email | EventPark',
+        title: 'Verify Email | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -102,7 +103,7 @@ export const routes: Routes = [
 
       {
         path: 'forgot-password',
-        title: 'Forgot Password | EventPark',
+        title: 'Forgot Password | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -114,7 +115,7 @@ export const routes: Routes = [
 
       {
         path: 'reset-password',
-        title: 'Reset Password | EventPark',
+        title: 'Reset Password | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -123,6 +124,7 @@ export const routes: Routes = [
             m => m.ResetPassword
           )
       }
+
     ]
   },
 
@@ -155,7 +157,7 @@ export const routes: Routes = [
 
       {
         path: 'dashboard',
-        title: 'Customer Dashboard | EventPark',
+        title: 'Customer Dashboard | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -167,7 +169,7 @@ export const routes: Routes = [
 
       {
         path: 'bookings',
-        title: 'My Bookings | EventPark',
+        title: 'My Bookings | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -179,7 +181,7 @@ export const routes: Routes = [
 
       {
         path: 'bookings/:id',
-        title: 'Booking Details | EventPark',
+        title: 'Booking Details | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -191,7 +193,7 @@ export const routes: Routes = [
 
       {
         path: 'events/:eventId/seats',
-        title: 'Select Seats | EventPark',
+        title: 'Select Seats | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -203,7 +205,7 @@ export const routes: Routes = [
 
       {
         path: 'events/:eventId/parking',
-        title: 'Select Parking | EventPark',
+        title: 'Select Parking | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -215,7 +217,7 @@ export const routes: Routes = [
 
       {
         path: 'checkout',
-        title: 'Checkout | EventPark',
+        title: 'Checkout | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -227,7 +229,7 @@ export const routes: Routes = [
 
       {
         path: 'bookings/:bookingId/payment',
-        title: 'Payment | EventPark',
+        title: 'Payment | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -239,7 +241,7 @@ export const routes: Routes = [
 
       {
         path: 'payments',
-        title: 'My Payments | EventPark',
+        title: 'My Payments | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -251,7 +253,7 @@ export const routes: Routes = [
 
       {
         path: 'notifications',
-        title: 'Notifications | EventPark',
+        title: 'Notifications | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -260,6 +262,7 @@ export const routes: Routes = [
             m => m.MyNotifications
           )
       }
+
     ]
   },
 
@@ -292,7 +295,7 @@ export const routes: Routes = [
 
       {
         path: 'dashboard',
-        title: 'Admin Dashboard | EventPark',
+        title: 'Admin Dashboard | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -304,7 +307,7 @@ export const routes: Routes = [
 
       {
         path: 'venues',
-        title: 'Manage Venues | EventPark',
+        title: 'Manage Venues | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -316,7 +319,7 @@ export const routes: Routes = [
 
       {
         path: 'categories',
-        title: 'Manage Categories | EventPark',
+        title: 'Manage Categories | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -328,7 +331,7 @@ export const routes: Routes = [
 
       {
         path: 'events',
-        title: 'Manage Events | EventPark',
+        title: 'Manage Events | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -340,7 +343,7 @@ export const routes: Routes = [
 
       {
         path: 'events/:eventId/seats',
-        title: 'Manage Seats | EventPark',
+        title: 'Manage Seats | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -352,7 +355,7 @@ export const routes: Routes = [
 
       {
         path: 'events/:eventId/parking',
-        title: 'Manage Parking | EventPark',
+        title: 'Manage Parking | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -364,7 +367,7 @@ export const routes: Routes = [
 
       {
         path: 'customers',
-        title: 'Manage Customers | EventPark',
+        title: 'Manage Customers | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -376,7 +379,7 @@ export const routes: Routes = [
 
       {
         path: 'bookings',
-        title: 'Manage Bookings | EventPark',
+        title: 'Manage Bookings | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -388,7 +391,7 @@ export const routes: Routes = [
 
       {
         path: 'payments',
-        title: 'Manage Payments | EventPark',
+        title: 'Manage Payments | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -400,7 +403,7 @@ export const routes: Routes = [
 
       {
         path: 'notifications',
-        title: 'Admin Notifications | EventPark',
+        title: 'Admin Notifications | VenueFlow',
 
         loadComponent: () =>
           import(
@@ -409,6 +412,7 @@ export const routes: Routes = [
             m => m.AdminNotifications
           )
       }
+
     ]
   },
 
@@ -418,7 +422,7 @@ export const routes: Routes = [
   // =====================================================
   {
     path: '**',
-    title: 'Page Not Found | EventPark',
+    title: 'Page Not Found | VenueFlow',
 
     loadComponent: () =>
       import(
@@ -427,4 +431,5 @@ export const routes: Routes = [
         m => m.NotFound
       )
   }
+
 ];
