@@ -1,1 +1,496 @@
-<p>admin-customers works!</p>
+<section class="admin-customers-page">
+
+  <div class="container">
+
+    <header class="page-header">
+
+      <div>
+
+        <span class="eyebrow">
+          CUSTOMER MANAGEMENT
+        </span>
+
+        <h1>
+          Manage Customers
+        </h1>
+
+        <p>
+          Search, update and manage VenueFlow customer accounts.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadCustomers()"
+        [disabled]="isLoading()"
+      >
+        Refresh
+      </button>
+
+    </header>
+
+
+    @if (successMessage()) {
+
+      <div class="success-message">
+        {{ successMessage() }}
+      </div>
+
+    }
+
+
+    @if (errorMessage()) {
+
+      <div class="error-message">
+        {{ errorMessage() }}
+      </div>
+
+    }
+
+
+    @if (
+      editingCustomerId() !== null
+    ) {
+
+      <section class="edit-card">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              EDIT CUSTOMER
+            </span>
+
+            <h2>
+              Update Customer
+            </h2>
+
+          </div>
+
+          <button
+            type="button"
+            class="cancel-button"
+            (click)="cancelEdit()"
+          >
+            Cancel Edit
+          </button>
+
+        </div>
+
+
+        <form
+          [formGroup]="customerForm"
+          (ngSubmit)="updateCustomer()"
+        >
+
+          <div class="form-grid">
+
+            <div class="form-field">
+
+              <label for="fullName">
+                Full Name
+              </label>
+
+              <input
+                id="fullName"
+                type="text"
+                formControlName="fullName"
+                placeholder="Enter full name"
+              />
+
+              @if (
+                customerForm.controls.fullName.touched &&
+                customerForm.controls.fullName.invalid
+              ) {
+
+                <small class="validation-error">
+
+                  @if (
+                    customerForm.controls.fullName.errors?.['required']
+                  ) {
+                    Full name is required.
+                  }
+
+                  @else if (
+                    customerForm.controls.fullName.errors?.['maxlength']
+                  ) {
+                    Full name is too long.
+                  }
+
+                </small>
+
+              }
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="phone">
+                Phone Number
+              </label>
+
+              <input
+                id="phone"
+                type="text"
+                formControlName="phone"
+                placeholder="Enter phone number"
+              />
+
+              @if (
+                customerForm.controls.phone.touched &&
+                customerForm.controls.phone.invalid
+              ) {
+
+                <small class="validation-error">
+
+                  @if (
+                    customerForm.controls.phone.errors?.['required']
+                  ) {
+                    Phone number is required.
+                  }
+
+                  @else if (
+                    customerForm.controls.phone.errors?.['maxlength']
+                  ) {
+                    Phone number is too long.
+                  }
+
+                </small>
+
+              }
+
+            </div>
+
+          </div>
+
+
+          <div class="form-actions">
+
+            <button
+              type="submit"
+              class="save-button"
+              [disabled]="isSaving()"
+            >
+
+              @if (isSaving()) {
+                Saving...
+              }
+
+              @else {
+                Update Customer
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+
+    }
+
+
+    <section class="search-card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-kicker">
+            SEARCH
+          </span>
+
+          <h2>
+            Find Customers
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <form
+        [formGroup]="searchForm"
+        (ngSubmit)="searchCustomers()"
+        class="search-form"
+      >
+
+        <input
+          type="text"
+          formControlName="search"
+          placeholder="Search by customer name or email"
+        />
+
+
+        <button
+          type="submit"
+          class="search-button"
+        >
+          Search
+        </button>
+
+
+        <button
+          type="button"
+          class="clear-button"
+          (click)="clearSearch()"
+        >
+          Clear
+        </button>
+
+      </form>
+
+    </section>
+
+
+    <section class="customers-card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-kicker">
+            CUSTOMERS
+          </span>
+
+          <h2>
+            Customer List
+          </h2>
+
+        </div>
+
+        <span class="customer-count">
+          {{ customers().length }}
+          customers
+        </span>
+
+      </div>
+
+
+      @if (isLoading()) {
+
+        <div class="loading-card">
+
+          <div class="spinner"></div>
+
+          <p>
+            Loading customers...
+          </p>
+
+        </div>
+
+      }
+
+
+      @else if (
+        customers().length === 0
+      ) {
+
+        <div class="empty-state">
+
+          <h3>
+            No customers found
+          </h3>
+
+          <p>
+            Try another search or refresh the customer list.
+          </p>
+
+        </div>
+
+      }
+
+
+      @else {
+
+        <div class="customer-grid">
+
+          @for (
+            customer of customers();
+            track customer.id
+          ) {
+
+            <article class="customer-card">
+
+              <div class="customer-header">
+
+                <div>
+
+                  <span class="customer-id">
+                    #{{ customer.id }}
+                  </span>
+
+                  <h3>
+                    {{ customer.fullName }}
+                  </h3>
+
+                  <p class="customer-email">
+                    {{ customer.email }}
+                  </p>
+
+                </div>
+
+
+                <span
+                  class="status-badge"
+                  [class.active]="isActive(customer)"
+                  [class.deactivated]="!isActive(customer)"
+                >
+                  {{ getStatusLabel(customer) }}
+                </span>
+
+              </div>
+
+
+              <div class="customer-info-grid">
+
+                <div>
+
+                  <span>
+                    Phone
+                  </span>
+
+                  <strong>
+                    {{ customer.phone }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Role
+                  </span>
+
+                  <strong>
+                    {{ customer.role }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Email Status
+                  </span>
+
+                  <strong
+                    [class.verified-text]="customer.emailVerified"
+                    [class.unverified-text]="!customer.emailVerified"
+                  >
+                    {{
+                      customer.emailVerified
+                        ? 'Verified'
+                        : 'Not Verified'
+                    }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Joined
+                  </span>
+
+                  <strong>
+                    {{
+                      customer.createdAt
+                        | date:'mediumDate'
+                    }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <div class="row-actions">
+
+                <button
+                  type="button"
+                  class="edit-button"
+                  (click)="editCustomer(customer)"
+                  [disabled]="
+                    actionCustomerId() === customer.id
+                  "
+                >
+                  Edit
+                </button>
+
+
+                @if (
+                  isActive(customer)
+                ) {
+
+                  <button
+                    type="button"
+                    class="deactivate-button"
+                    (click)="deactivateCustomer(customer)"
+                    [disabled]="
+                      actionCustomerId() === customer.id
+                    "
+                  >
+
+                    @if (
+                      actionCustomerId() === customer.id
+                    ) {
+                      Processing...
+                    }
+
+                    @else {
+                      Deactivate
+                    }
+
+                  </button>
+
+                }
+
+                @else {
+
+                  <button
+                    type="button"
+                    class="reactivate-button"
+                    (click)="reactivateCustomer(customer)"
+                    [disabled]="
+                      actionCustomerId() === customer.id
+                    "
+                  >
+
+                    @if (
+                      actionCustomerId() === customer.id
+                    ) {
+                      Processing...
+                    }
+
+                    @else {
+                      Reactivate
+                    }
+
+                  </button>
+
+                }
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+  </div>
+
+</section>
