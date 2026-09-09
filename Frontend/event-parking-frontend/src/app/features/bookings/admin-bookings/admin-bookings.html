@@ -1,1 +1,751 @@
-<p>admin-bookings works!</p>
+<section class="admin-bookings-page">
+
+  <div class="container">
+
+    <header class="page-header">
+
+      <div>
+
+        <span class="eyebrow">
+          BOOKING MANAGEMENT
+        </span>
+
+        <h1>
+          Manage Bookings
+        </h1>
+
+        <p>
+          View all VenueFlow bookings, filter records and manage pending reservations.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadBookings()"
+        [disabled]="isLoading()"
+      >
+        Refresh
+      </button>
+
+    </header>
+
+
+    @if (successMessage()) {
+
+      <div class="success-message">
+        {{ successMessage() }}
+      </div>
+
+    }
+
+
+    @if (errorMessage()) {
+
+      <div class="error-message">
+        {{ errorMessage() }}
+      </div>
+
+    }
+
+
+    <section class="stats-grid">
+
+      <article class="stat-card">
+
+        <span>
+          Total Bookings
+        </span>
+
+        <strong>
+          {{ totalBookings() }}
+        </strong>
+
+      </article>
+
+
+      <article class="stat-card pending-card">
+
+        <span>
+          Pending
+        </span>
+
+        <strong>
+          {{ pendingBookings() }}
+        </strong>
+
+      </article>
+
+
+      <article class="stat-card confirmed-card">
+
+        <span>
+          Confirmed
+        </span>
+
+        <strong>
+          {{ confirmedBookings() }}
+        </strong>
+
+      </article>
+
+
+      <article class="stat-card cancelled-card">
+
+        <span>
+          Cancelled
+        </span>
+
+        <strong>
+          {{ cancelledBookings() }}
+        </strong>
+
+      </article>
+
+
+      <article class="stat-card expired-card">
+
+        <span>
+          Expired
+        </span>
+
+        <strong>
+          {{ expiredBookings() }}
+        </strong>
+
+      </article>
+
+    </section>
+
+
+    <section class="filter-card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-kicker">
+            FILTER BOOKINGS
+          </span>
+
+          <h2>
+            Search & Filter
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="filter-grid">
+
+        <div class="filter-field">
+
+          <label for="bookingSearch">
+            Search
+          </label>
+
+          <input
+            id="bookingSearch"
+            type="text"
+            [value]="searchTerm()"
+            (input)="onSearchInput($event)"
+            placeholder="Booking no, customer or event"
+          />
+
+        </div>
+
+
+        <div class="filter-field">
+
+          <label for="statusFilter">
+            Booking Status
+          </label>
+
+          <select
+            id="statusFilter"
+            [value]="selectedStatus()"
+            (change)="onStatusChange($event)"
+          >
+
+            <option value="0">
+              All Statuses
+            </option>
+
+            <option
+              [value]="BookingStatus.Pending"
+            >
+              Pending
+            </option>
+
+            <option
+              [value]="BookingStatus.Confirmed"
+            >
+              Confirmed
+            </option>
+
+            <option
+              [value]="BookingStatus.Cancelled"
+            >
+              Cancelled
+            </option>
+
+            <option
+              [value]="BookingStatus.Expired"
+            >
+              Expired
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="filter-actions">
+
+          <button
+            type="button"
+            class="clear-button"
+            (click)="clearFilters()"
+          >
+            Clear Filters
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="bookings-card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-kicker">
+            BOOKINGS
+          </span>
+
+          <h2>
+            Booking List
+          </h2>
+
+        </div>
+
+        <span class="booking-count">
+          {{ filteredBookings().length }}
+          bookings
+        </span>
+
+      </div>
+
+
+      @if (isLoading()) {
+
+        <div class="loading-card">
+
+          <div class="spinner"></div>
+
+          <p>
+            Loading bookings...
+          </p>
+
+        </div>
+
+      }
+
+
+      @else if (
+        filteredBookings().length === 0
+      ) {
+
+        <div class="empty-state">
+
+          <h3>
+            No bookings found
+          </h3>
+
+          <p>
+            Try changing the search or status filter.
+          </p>
+
+        </div>
+
+      }
+
+
+      @else {
+
+        <div class="booking-list">
+
+          @for (
+            booking of filteredBookings();
+            track booking.id
+          ) {
+
+            <article class="booking-item">
+
+              <div class="booking-main">
+
+                <div class="booking-top-row">
+
+                  <div>
+
+                    <span class="booking-id">
+                      #{{ booking.id }}
+                    </span>
+
+                    <h3>
+                      {{ booking.bookingNumber }}
+                    </h3>
+
+                  </div>
+
+
+                  <span
+                    class="status-badge"
+                    [class]="
+                      'status-badge ' +
+                      statusClass(booking.status)
+                    "
+                  >
+                    {{ statusText(booking.status) }}
+                  </span>
+
+                </div>
+
+
+                <div class="booking-info-grid">
+
+                  <div>
+
+                    <span>
+                      Customer
+                    </span>
+
+                    <strong>
+                      {{ booking.customerName }}
+                    </strong>
+
+                    <small>
+                      ID: {{ booking.customerId }}
+                    </small>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Event
+                    </span>
+
+                    <strong>
+                      {{ booking.eventName }}
+                    </strong>
+
+                    <small>
+                      Event ID:
+                      {{ booking.eventId }}
+                    </small>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Seats
+                    </span>
+
+                    <strong>
+                      {{ seatCount(booking) }}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Parking
+                    </span>
+
+                    <strong>
+                      {{
+                        booking.parking
+                          ? booking.parking.slotNumber
+                          : 'Not selected'
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Total Amount
+                    </span>
+
+                    <strong class="amount">
+                      LKR
+                      {{
+                        booking.totalAmount
+                          | number:'1.2-2'
+                      }}
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Created
+                    </span>
+
+                    <strong>
+                      {{
+                        booking.createdAt
+                          | date:'medium'
+                      }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                @if (
+                  booking.status ===
+                  BookingStatus.Pending &&
+                  booking.holdExpiresAt
+                ) {
+
+                  <div class="hold-info">
+
+                    <span>
+                      Hold expires:
+                    </span>
+
+                    <strong>
+                      {{
+                        booking.holdExpiresAt
+                          | date:'medium'
+                      }}
+                    </strong>
+
+                  </div>
+
+                }
+
+
+                <div class="row-actions">
+
+                  <button
+                    type="button"
+                    class="details-button"
+                    (click)="toggleDetails(booking.id)"
+                  >
+                    {{
+                      isExpanded(booking.id)
+                        ? 'Hide Details'
+                        : 'View Details'
+                    }}
+                  </button>
+
+
+                  @if (
+                    canCancel(booking)
+                  ) {
+
+                    <button
+                      type="button"
+                      class="cancel-booking-button"
+                      (click)="cancelBooking(booking)"
+                      [disabled]="
+                        cancellingBookingId() !== null
+                      "
+                    >
+
+                      @if (
+                        cancellingBookingId() ===
+                        booking.id
+                      ) {
+                        Cancelling...
+                      }
+
+                      @else {
+                        Cancel Booking
+                      }
+
+                    </button>
+
+                  }
+
+                </div>
+
+              </div>
+
+
+              @if (
+                isExpanded(booking.id)
+              ) {
+
+                <div class="booking-details">
+
+                  <div class="details-section">
+
+                    <h4>
+                      Booking Timeline
+                    </h4>
+
+
+                    <div class="timeline-grid">
+
+                      <div>
+
+                        <span>
+                          Created At
+                        </span>
+
+                        <strong>
+                          {{
+                            booking.createdAt
+                              | date:'medium'
+                          }}
+                        </strong>
+
+                      </div>
+
+
+                      <div>
+
+                        <span>
+                          Confirmed At
+                        </span>
+
+                        <strong>
+                          {{
+                            booking.confirmedAt
+                              ? (booking.confirmedAt | date:'medium')
+                              : 'Not confirmed'
+                          }}
+                        </strong>
+
+                      </div>
+
+
+                      <div>
+
+                        <span>
+                          Cancelled At
+                        </span>
+
+                        <strong>
+                          {{
+                            booking.cancelledAt
+                              ? (booking.cancelledAt | date:'medium')
+                              : 'Not cancelled'
+                          }}
+                        </strong>
+
+                      </div>
+
+
+                      <div>
+
+                        <span>
+                          Hold Expires
+                        </span>
+
+                        <strong>
+                          {{
+                            booking.holdExpiresAt
+                              ? (booking.holdExpiresAt | date:'medium')
+                              : 'Not applicable'
+                          }}
+                        </strong>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="details-section">
+
+                    <h4>
+                      Seats
+                    </h4>
+
+
+                    @if (
+                      booking.seats.length === 0
+                    ) {
+
+                      <p class="detail-empty">
+                        No seats attached to this booking.
+                      </p>
+
+                    }
+
+                    @else {
+
+                      <div class="seat-list">
+
+                        @for (
+                          seat of booking.seats;
+                          track seat.seatId
+                        ) {
+
+                          <div class="seat-item">
+
+                            <div>
+
+                              <span>
+                                Seat
+                              </span>
+
+                              <strong>
+                                {{ seat.seatNumber }}
+                              </strong>
+
+                            </div>
+
+
+                            <div>
+
+                              <span>
+                                Type
+                              </span>
+
+                              <strong>
+                                {{ seat.seatType }}
+                              </strong>
+
+                            </div>
+
+
+                            <div>
+
+                              <span>
+                                Price
+                              </span>
+
+                              <strong>
+                                LKR
+                                {{
+                                  seat.priceAtBooking
+                                    | number:'1.2-2'
+                                }}
+                              </strong>
+
+                            </div>
+
+                          </div>
+
+                        }
+
+                      </div>
+
+                    }
+
+                  </div>
+
+
+                  <div class="details-section">
+
+                    <h4>
+                      Parking
+                    </h4>
+
+
+                    @if (
+                      booking.parking
+                    ) {
+
+                      <div class="parking-details">
+
+                        <div>
+
+                          <span>
+                            Slot
+                          </span>
+
+                          <strong>
+                            {{
+                              booking.parking.slotNumber
+                            }}
+                          </strong>
+
+                        </div>
+
+
+                        <div>
+
+                          <span>
+                            Zone
+                          </span>
+
+                          <strong>
+                            {{
+                              booking.parking.zone
+                            }}
+                          </strong>
+
+                        </div>
+
+
+                        <div>
+
+                          <span>
+                            Reserved Fee
+                          </span>
+
+                          <strong>
+                            LKR
+                            {{
+                              booking.parking.reservedFee
+                                | number:'1.2-2'
+                            }}
+                          </strong>
+
+                        </div>
+
+                      </div>
+
+                    }
+
+                    @else {
+
+                      <p class="detail-empty">
+                        No parking slot selected.
+                      </p>
+
+                    }
+
+                  </div>
+
+                </div>
+
+              }
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+  </div>
+
+</section>
