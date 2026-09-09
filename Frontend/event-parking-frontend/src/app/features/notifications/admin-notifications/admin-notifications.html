@@ -1,1 +1,551 @@
-<p>admin-notifications works!</p>
+<div class="admin-notifications-page">
+
+  <section class="page-header">
+
+    <div>
+      <p class="eyebrow">
+        NOTIFICATION MANAGEMENT
+      </p>
+
+      <h1>
+        Manage Notifications
+      </h1>
+
+      <p class="subtitle">
+        View and monitor all customer notifications across VenueFlow.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="loadNotifications()"
+      [disabled]="isLoading()"
+    >
+      Refresh
+    </button>
+
+  </section>
+
+
+  @if (successMessage()) {
+
+    <div class="message success-message">
+      {{ successMessage() }}
+    </div>
+
+  }
+
+
+  @if (errorMessage()) {
+
+    <div class="message error-message">
+      {{ errorMessage() }}
+    </div>
+
+  }
+
+
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <span class="stat-label">
+        Total Notifications
+      </span>
+
+      <strong class="stat-value">
+        {{ totalNotifications() }}
+      </strong>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <span class="stat-label">
+        Unread
+      </span>
+
+      <strong class="stat-value unread-text">
+        {{ unreadNotifications() }}
+      </strong>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <span class="stat-label">
+        Read
+      </span>
+
+      <strong class="stat-value read-text">
+        {{ readNotifications() }}
+      </strong>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <span class="stat-label">
+        Booking Notifications
+      </span>
+
+      <strong class="stat-value">
+        {{ bookingNotifications() }}
+      </strong>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <span class="stat-label">
+        Payment Notifications
+      </span>
+
+      <strong class="stat-value">
+        {{ paymentNotifications() }}
+      </strong>
+
+    </article>
+
+  </section>
+
+
+  <section class="filter-card">
+
+    <div class="filter-heading">
+
+      <div>
+
+        <h2>
+          Search & Filter
+        </h2>
+
+        <p>
+          Find notifications by title, message,
+          customer, booking or event.
+        </p>
+
+      </div>
+
+
+      @if (
+        searchTerm() ||
+        selectedType() !== 0 ||
+        selectedReadState() !== 'all'
+      ) {
+
+        <button
+          type="button"
+          class="clear-btn"
+          (click)="clearFilters()"
+        >
+          Clear Filters
+        </button>
+
+      }
+
+    </div>
+
+
+    <div class="filter-grid">
+
+      <label class="field search-field">
+
+        <span>
+          Search
+        </span>
+
+        <input
+          type="text"
+          placeholder="Search notifications..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Notification Type
+        </span>
+
+        <select
+          [value]="selectedType()"
+          (change)="onTypeChange($event)"
+        >
+
+          <option value="0">
+            All Types
+          </option>
+
+          <option
+            [value]="NotificationType.BookingConfirmed"
+          >
+            Booking Confirmed
+          </option>
+
+          <option
+            [value]="NotificationType.BookingCancelled"
+          >
+            Booking Cancelled
+          </option>
+
+          <option
+            [value]="NotificationType.PaymentCompleted"
+          >
+            Payment Completed
+          </option>
+
+          <option
+            [value]="NotificationType.EventReminder"
+          >
+            Event Reminder
+          </option>
+
+          <option
+            [value]="NotificationType.EventUpdated"
+          >
+            Event Updated
+          </option>
+
+        </select>
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Read Status
+        </span>
+
+        <select
+          [value]="selectedReadState()"
+          (change)="onReadStateChange($event)"
+        >
+
+          <option value="all">
+            All
+          </option>
+
+          <option value="unread">
+            Unread
+          </option>
+
+          <option value="read">
+            Read
+          </option>
+
+        </select>
+
+      </label>
+
+    </div>
+
+  </section>
+
+
+  <section class="notifications-card">
+
+    <div class="section-heading">
+
+      <div>
+
+        <h2>
+          Notifications
+        </h2>
+
+        <p>
+          {{ filteredNotifications().length }}
+          result(s)
+        </p>
+
+      </div>
+
+    </div>
+
+
+    @if (isLoading()) {
+
+      <div class="loading-state">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading notifications...
+        </p>
+
+      </div>
+
+    } @else if (
+      filteredNotifications().length === 0
+    ) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          N
+        </div>
+
+        <h3>
+          No notifications found
+        </h3>
+
+        <p>
+          No notification records match your
+          current search or filters.
+        </p>
+
+      </div>
+
+    } @else {
+
+      <div class="notification-list">
+
+        @for (
+          notification of filteredNotifications();
+          track notification.id
+        ) {
+
+          <article
+            class="notification-item"
+            [class.unread]="!notification.isRead"
+          >
+
+            <div class="notification-main">
+
+              <div
+                class="type-badge"
+                [class.booking-confirmed]="
+                  typeClass(notification.type)
+                    === 'booking-confirmed'
+                "
+                [class.booking-cancelled]="
+                  typeClass(notification.type)
+                    === 'booking-cancelled'
+                "
+                [class.payment-completed]="
+                  typeClass(notification.type)
+                    === 'payment-completed'
+                "
+                [class.event-reminder]="
+                  typeClass(notification.type)
+                    === 'event-reminder'
+                "
+                [class.event-updated]="
+                  typeClass(notification.type)
+                    === 'event-updated'
+                "
+              >
+                {{
+                  typeShort(
+                    notification.type
+                  )
+                }}
+              </div>
+
+
+              <div class="notification-content">
+
+                <div class="notification-title-row">
+
+                  <div>
+
+                    <h3>
+                      {{ notification.title }}
+                    </h3>
+
+                    <p class="type-text">
+                      {{
+                        typeText(
+                          notification.type
+                        )
+                      }}
+                    </p>
+
+                  </div>
+
+
+                  <span
+                    class="read-badge"
+                    [class.read]="
+                      notification.isRead
+                    "
+                    [class.unread]="
+                      !notification.isRead
+                    "
+                  >
+                    {{
+                      notification.isRead
+                        ? 'Read'
+                        : 'Unread'
+                    }}
+                  </span>
+
+                </div>
+
+
+                <p class="notification-message">
+                  {{ notification.message }}
+                </p>
+
+
+                <div class="notification-info-grid">
+
+                  <div class="info-box">
+
+                    <span class="info-label">
+                      Notification ID
+                    </span>
+
+                    <strong>
+                      #{{ notification.id }}
+                    </strong>
+
+                  </div>
+
+
+                  <div class="info-box">
+
+                    <span class="info-label">
+                      Customer ID
+                    </span>
+
+                    <strong>
+                      #{{ notification.customerId }}
+                    </strong>
+
+                  </div>
+
+
+                  <div class="info-box">
+
+                    <span class="info-label">
+                      Booking
+                    </span>
+
+                    <strong>
+                      @if (
+                        notification.bookingId
+                          !== null
+                      ) {
+                        #{{ notification.bookingId }}
+                      } @else {
+                        Not linked
+                      }
+                    </strong>
+
+                  </div>
+
+
+                  <div class="info-box">
+
+                    <span class="info-label">
+                      Event
+                    </span>
+
+                    <strong>
+                      @if (
+                        notification.eventId
+                          !== null
+                      ) {
+                        #{{ notification.eventId }}
+                      } @else {
+                        Not linked
+                      }
+                    </strong>
+
+                  </div>
+
+
+                  <div class="info-box">
+
+                    <span class="info-label">
+                      Created Date
+                    </span>
+
+                    <strong>
+                      {{
+                        notification.createdAt
+                          | date:'MMM d, y'
+                      }}
+                    </strong>
+
+                    <small>
+                      {{
+                        notification.createdAt
+                          | date:'h:mm a'
+                      }}
+                    </small>
+
+                  </div>
+
+
+                  <div class="info-box">
+
+                    <span class="info-label">
+                      Type
+                    </span>
+
+                    <strong>
+                      {{
+                        typeText(
+                          notification.type
+                        )
+                      }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                @if (!notification.isRead) {
+
+                  <div class="notification-actions">
+
+                    <button
+                      type="button"
+                      class="mark-read-btn"
+                      (click)="markAsRead(notification)"
+                      [disabled]="
+                        updatingNotificationId()
+                          !== null
+                      "
+                    >
+                      @if (
+                        updatingNotificationId()
+                          === notification.id
+                      ) {
+                        Marking...
+                      } @else {
+                        Mark as Read
+                      }
+                    </button>
+
+                  </div>
+
+                }
+
+              </div>
+
+            </div>
+
+          </article>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+</div>
