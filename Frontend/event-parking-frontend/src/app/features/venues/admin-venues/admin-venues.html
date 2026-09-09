@@ -1,1 +1,433 @@
-<p>admin-venues works!</p>
+<section class="admin-venues-page">
+
+  <div class="container">
+
+    <header class="page-header">
+
+      <div>
+
+        <span class="eyebrow">
+          VENUE MANAGEMENT
+        </span>
+
+        <h1>
+          Manage Venues
+        </h1>
+
+        <p>
+          Create, update and manage all event venues in VenueFlow.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadVenues()"
+        [disabled]="isLoading()"
+      >
+        Refresh
+      </button>
+
+    </header>
+
+
+    @if (successMessage()) {
+
+      <div class="success-message">
+        {{ successMessage() }}
+      </div>
+
+    }
+
+
+    @if (errorMessage()) {
+
+      <div class="error-message">
+        {{ errorMessage() }}
+      </div>
+
+    }
+
+
+    <section class="form-card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-kicker">
+            {{
+              editingVenueId() === null
+                ? 'CREATE VENUE'
+                : 'EDIT VENUE'
+            }}
+          </span>
+
+          <h2>
+            {{
+              editingVenueId() === null
+                ? 'Add New Venue'
+                : 'Update Venue'
+            }}
+          </h2>
+
+        </div>
+
+        @if (
+          editingVenueId() !== null
+        ) {
+
+          <button
+            type="button"
+            class="cancel-button"
+            (click)="cancelEdit()"
+          >
+            Cancel Edit
+          </button>
+
+        }
+
+      </div>
+
+
+      <form
+        [formGroup]="venueForm"
+        (ngSubmit)="saveVenue()"
+      >
+
+        <div class="form-grid">
+
+          <div class="form-field">
+
+            <label for="venueName">
+              Venue Name
+            </label>
+
+            <input
+              id="venueName"
+              type="text"
+              formControlName="name"
+              placeholder="Example: Grand Convention Hall"
+            />
+
+            @if (
+              venueForm.controls.name.touched &&
+              venueForm.controls.name.invalid
+            ) {
+
+              <small class="validation-error">
+
+                @if (
+                  venueForm.controls.name.errors?.['required']
+                ) {
+                  Venue name is required.
+                }
+
+                @else if (
+                  venueForm.controls.name.errors?.['maxlength']
+                ) {
+                  Venue name is too long.
+                }
+
+              </small>
+
+            }
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="capacity">
+              Capacity
+            </label>
+
+            <input
+              id="capacity"
+              type="number"
+              min="1"
+              formControlName="capacity"
+              placeholder="Example: 500"
+            />
+
+            @if (
+              venueForm.controls.capacity.touched &&
+              venueForm.controls.capacity.invalid
+            ) {
+
+              <small class="validation-error">
+                Capacity must be at least 1.
+              </small>
+
+            }
+
+          </div>
+
+
+          <div class="form-field full-width">
+
+            <label for="address">
+              Address
+            </label>
+
+            <textarea
+              id="address"
+              rows="3"
+              formControlName="address"
+              placeholder="Enter complete venue address"
+            ></textarea>
+
+            @if (
+              venueForm.controls.address.touched &&
+              venueForm.controls.address.invalid
+            ) {
+
+              <small class="validation-error">
+
+                @if (
+                  venueForm.controls.address.errors?.['required']
+                ) {
+                  Address is required.
+                }
+
+                @else if (
+                  venueForm.controls.address.errors?.['maxlength']
+                ) {
+                  Address is too long.
+                }
+
+              </small>
+
+            }
+
+          </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button
+            type="submit"
+            class="save-button"
+            [disabled]="isSaving()"
+          >
+
+            @if (isSaving()) {
+
+              Saving...
+
+            }
+
+            @else {
+
+              {{
+                editingVenueId() === null
+                  ? 'Create Venue'
+                  : 'Update Venue'
+              }}
+
+            }
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <section class="venues-card">
+
+      <div class="section-heading">
+
+        <div>
+
+          <span class="section-kicker">
+            VENUES
+          </span>
+
+          <h2>
+            Venue List
+          </h2>
+
+        </div>
+
+        <span class="venue-count">
+          {{ venues().length | number }}
+          venues
+        </span>
+
+      </div>
+
+
+      @if (isLoading()) {
+
+        <div class="loading-card">
+
+          <div class="spinner"></div>
+
+          <p>
+            Loading venues...
+          </p>
+
+        </div>
+
+      }
+
+
+      @else if (
+        venues().length === 0
+      ) {
+
+        <div class="empty-state">
+
+          <h3>
+            No venues found
+          </h3>
+
+          <p>
+            Create your first venue using the form above.
+          </p>
+
+        </div>
+
+      }
+
+
+      @else {
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  ID
+                </th>
+
+                <th>
+                  Venue Name
+                </th>
+
+                <th>
+                  Address
+                </th>
+
+                <th>
+                  Capacity
+                </th>
+
+                <th class="actions-column">
+                  Actions
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+                venue of venues();
+                track venue.id
+              ) {
+
+                <tr>
+
+                  <td>
+                    #{{ venue.id }}
+                  </td>
+
+
+                  <td>
+
+                    <strong class="venue-name">
+                      {{ venue.name }}
+                    </strong>
+
+                  </td>
+
+
+                  <td class="address-cell">
+                    {{ venue.address }}
+                  </td>
+
+
+                  <td>
+
+                    <span class="capacity-badge">
+                      {{ venue.capacity | number }}
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="row-actions">
+
+                      <button
+                        type="button"
+                        class="edit-button"
+                        (click)="editVenue(venue)"
+                        [disabled]="
+                          deletingId() === venue.id
+                        "
+                      >
+                        Edit
+                      </button>
+
+
+                      <button
+                        type="button"
+                        class="delete-button"
+                        (click)="deleteVenue(venue)"
+                        [disabled]="
+                          deletingId() === venue.id
+                        "
+                      >
+
+                        @if (
+                          deletingId() === venue.id
+                        ) {
+
+                          Deleting...
+
+                        }
+
+                        @else {
+
+                          Delete
+
+                        }
+
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      }
+
+    </section>
+
+  </div>
+
+</section>
