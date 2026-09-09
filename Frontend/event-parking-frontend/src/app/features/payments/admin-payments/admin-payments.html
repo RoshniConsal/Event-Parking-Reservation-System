@@ -1,1 +1,487 @@
-<p>admin-payments works!</p>
+<div class="admin-payments-page">
+
+  <section class="page-header">
+
+    <div>
+      <p class="eyebrow">
+        PAYMENT MANAGEMENT
+      </p>
+
+      <h1>
+        Manage Payments
+      </h1>
+
+      <p class="subtitle">
+        View and monitor all customer payments across VenueFlow.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="loadPayments()"
+      [disabled]="isLoading()"
+    >
+      Refresh
+    </button>
+
+  </section>
+
+
+  @if (errorMessage()) {
+
+    <div class="message error-message">
+      {{ errorMessage() }}
+    </div>
+
+  }
+
+
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <span class="stat-label">
+        Total Payments
+      </span>
+
+      <strong class="stat-value">
+        {{ totalPayments() }}
+      </strong>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <span class="stat-label">
+        Completed
+      </span>
+
+      <strong class="stat-value completed-text">
+        {{ completedPayments() }}
+      </strong>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <span class="stat-label">
+        Pending
+      </span>
+
+      <strong class="stat-value pending-text">
+        {{ pendingPayments() }}
+      </strong>
+
+    </article>
+
+
+    <article class="stat-card revenue-card">
+
+      <span class="stat-label">
+        Total Revenue
+      </span>
+
+      <strong class="stat-value">
+        LKR
+        {{
+          totalRevenue()
+            | number:'1.2-2'
+        }}
+      </strong>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <span class="stat-label">
+        Pending Amount
+      </span>
+
+      <strong class="stat-value pending-text">
+        LKR
+        {{
+          pendingAmount()
+            | number:'1.2-2'
+        }}
+      </strong>
+
+    </article>
+
+  </section>
+
+
+  <section class="filter-card">
+
+    <div class="filter-heading">
+
+      <div>
+        <h2>
+          Search & Filter
+        </h2>
+
+        <p>
+          Find payments by customer, booking,
+          transaction reference or payment ID.
+        </p>
+      </div>
+
+      @if (
+        searchTerm() ||
+        selectedStatus() !== 0 ||
+        selectedMethod() !== -1
+      ) {
+
+        <button
+          type="button"
+          class="clear-btn"
+          (click)="clearFilters()"
+        >
+          Clear Filters
+        </button>
+
+      }
+
+    </div>
+
+
+    <div class="filter-grid">
+
+      <label class="field search-field">
+
+        <span>
+          Search
+        </span>
+
+        <input
+          type="text"
+          placeholder="Search payments..."
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+        />
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Status
+        </span>
+
+        <select
+          [value]="selectedStatus()"
+          (change)="onStatusChange($event)"
+        >
+
+          <option value="0">
+            All Statuses
+          </option>
+
+          <option
+            [value]="PaymentStatus.Pending"
+          >
+            Pending
+          </option>
+
+          <option
+            [value]="PaymentStatus.Completed"
+          >
+            Completed
+          </option>
+
+        </select>
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Payment Method
+        </span>
+
+        <select
+          [value]="selectedMethod()"
+          (change)="onMethodChange($event)"
+        >
+
+          <option value="-1">
+            All Methods
+          </option>
+
+          <option
+            [value]="PaymentMethod.Card"
+          >
+            Card
+          </option>
+
+          <option
+            [value]="PaymentMethod.BankTransfer"
+          >
+            Bank Transfer
+          </option>
+
+          <option
+            [value]="PaymentMethod.MobileWallet"
+          >
+            Mobile Wallet
+          </option>
+
+          <option
+            [value]="PaymentMethod.NotSpecified"
+          >
+            Not Specified
+          </option>
+
+        </select>
+
+      </label>
+
+    </div>
+
+  </section>
+
+
+  <section class="payments-card">
+
+    <div class="section-heading">
+
+      <div>
+        <h2>
+          Payments
+        </h2>
+
+        <p>
+          {{
+            filteredPayments().length
+          }}
+          result(s)
+        </p>
+      </div>
+
+    </div>
+
+
+    @if (isLoading()) {
+
+      <div class="loading-state">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading payments...
+        </p>
+
+      </div>
+
+    } @else if (
+      filteredPayments().length === 0
+    ) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          $
+        </div>
+
+        <h3>
+          No payments found
+        </h3>
+
+        <p>
+          No payment records match your
+          current search or filters.
+        </p>
+
+      </div>
+
+    } @else {
+
+      <div class="payment-list">
+
+        @for (
+          payment of filteredPayments();
+          track payment.id
+        ) {
+
+          <article class="payment-item">
+
+            <div class="payment-main">
+
+              <div class="method-badge">
+                {{
+                  paymentMethodShort(
+                    payment.paymentMethod
+                  )
+                }}
+              </div>
+
+
+              <div class="payment-title-block">
+
+                <div class="payment-title-row">
+
+                  <h3>
+                    Payment #{{ payment.id }}
+                  </h3>
+
+                  <span
+                    class="status-badge"
+                    [class.pending]="
+                      statusClass(
+                        payment.status
+                      ) === 'pending'
+                    "
+                    [class.completed]="
+                      statusClass(
+                        payment.status
+                      ) === 'completed'
+                    "
+                  >
+                    {{
+                      statusText(
+                        payment.status
+                      )
+                    }}
+                  </span>
+
+                </div>
+
+
+                <p class="transaction-ref">
+                  {{
+                    payment.transactionReference
+                  }}
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="payment-info-grid">
+
+              <div class="info-box">
+
+                <span class="info-label">
+                  Customer
+                </span>
+
+                <strong>
+                  {{ payment.customerName }}
+                </strong>
+
+                <small>
+                  ID #{{ payment.customerId }}
+                </small>
+
+              </div>
+
+
+              <div class="info-box">
+
+                <span class="info-label">
+                  Booking
+                </span>
+
+                <strong>
+                  {{ payment.bookingNumber }}
+                </strong>
+
+                <small>
+                  Booking ID #{{ payment.bookingId }}
+                </small>
+
+              </div>
+
+
+              <div class="info-box">
+
+                <span class="info-label">
+                  Payment Method
+                </span>
+
+                <strong>
+                  {{
+                    paymentMethodText(
+                      payment.paymentMethod
+                    )
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="info-box">
+
+                <span class="info-label">
+                  Amount
+                </span>
+
+                <strong class="amount">
+                  LKR
+                  {{
+                    payment.amount
+                      | number:'1.2-2'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="info-box">
+
+                <span class="info-label">
+                  Payment Date
+                </span>
+
+                <strong>
+                  {{
+                    payment.createdAt
+                      | date:'MMM d, y'
+                  }}
+                </strong>
+
+                <small>
+                  {{
+                    payment.createdAt
+                      | date:'h:mm a'
+                  }}
+                </small>
+
+              </div>
+
+
+              <div class="info-box">
+
+                <span class="info-label">
+                  Status
+                </span>
+
+                <strong>
+                  {{
+                    statusText(
+                      payment.status
+                    )
+                  }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+</div>
