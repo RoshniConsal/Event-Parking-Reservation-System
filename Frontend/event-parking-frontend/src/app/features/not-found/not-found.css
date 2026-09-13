@@ -1,0 +1,191 @@
+:host {
+  display: block;
+}
+
+.not-found-page {
+  min-height: calc(100vh - 80px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 20px;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(37, 99, 235, 0.08),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(20, 184, 166, 0.08),
+      transparent 35%
+    ),
+    #f8fafc;
+}
+
+.not-found-card {
+  width: 100%;
+  max-width: 620px;
+
+  padding: 54px 44px;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 28px;
+
+  box-shadow:
+    0 24px 60px
+    rgba(15, 23, 42, 0.08);
+}
+
+.error-code {
+  margin-bottom: 12px;
+
+  color: #0f766e;
+
+  font-size: clamp(
+    70px,
+    15vw,
+    120px
+  );
+
+  font-weight: 900;
+  line-height: 0.9;
+
+  letter-spacing: -0.06em;
+}
+
+.eyebrow {
+  margin: 22px 0 10px;
+
+  color: #2563eb;
+
+  font-size: 11px;
+  font-weight: 900;
+
+  letter-spacing: 0.15em;
+}
+
+.not-found-card h1 {
+  margin: 0 0 16px;
+
+  color: #0f172a;
+
+  font-size: clamp(
+    28px,
+    5vw,
+    40px
+  );
+
+  line-height: 1.15;
+
+  letter-spacing: -0.03em;
+}
+
+.message {
+  max-width: 500px;
+
+  margin: 0 auto;
+
+  color: #64748b;
+
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+
+  gap: 12px;
+
+  margin-top: 30px;
+}
+
+.primary-btn,
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 150px;
+
+  padding: 13px 18px;
+
+  border-radius: 12px;
+
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.primary-btn {
+  color: #ffffff;
+  background: #0f766e;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 25px
+    rgba(15, 118, 110, 0.2);
+}
+
+.secondary-btn {
+  color: #334155;
+  background: #f1f5f9;
+
+  border: 1px solid #e2e8f0;
+}
+
+.secondary-btn:hover {
+  background: #e2e8f0;
+
+  transform: translateY(-2px);
+}
+
+.brand-note {
+  margin: 34px 0 0;
+
+  color: #94a3b8;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 600px) {
+
+  .not-found-page {
+    padding: 24px 14px;
+  }
+
+  .not-found-card {
+    padding: 42px 22px;
+
+    border-radius: 22px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

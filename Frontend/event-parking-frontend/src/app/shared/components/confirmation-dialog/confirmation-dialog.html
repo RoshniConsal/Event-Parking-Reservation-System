@@ -1,0 +1,51 @@
+@if (open) {
+
+  <div
+    class="dialog-backdrop"
+    (click)="cancelled.emit()"
+  >
+
+    <section
+      class="dialog glass-panel animate-scale-in"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="dialog-icon">
+        ?
+      </div>
+
+      <h2>
+        {{ title }}
+      </h2>
+
+      <p>
+        {{ message }}
+      </p>
+
+      <div class="dialog-actions">
+
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="cancelled.emit()"
+        >
+          {{ cancelLabel }}
+        </button>
+
+        <button
+          type="button"
+          class="btn"
+          [class.btn-primary]="!danger"
+          [class.btn-danger]="danger"
+          (click)="confirmed.emit()"
+        >
+          {{ confirmLabel }}
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+}

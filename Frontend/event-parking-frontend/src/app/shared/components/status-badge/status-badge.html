@@ -1,0 +1,12 @@
+<span
+  class="badge"
+  [class.badge-primary]="tone === 'primary'"
+  [class.badge-success]="tone === 'success'"
+  [class.badge-warning]="tone === 'warning'"
+  [class.badge-danger]="tone === 'danger'"
+  [class.badge-info]="tone === 'info'"
+>
+  <span class="status-dot"></span>
+
+  {{ label }}
+</span>
