@@ -20,6 +20,9 @@ import {
   roleGuard
 } from './core/guards/role-guard';
 
+import {
+  Router
+} from '@angular/router';
 
 export const routes: Routes = [
 
