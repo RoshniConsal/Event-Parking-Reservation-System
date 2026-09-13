@@ -15,7 +15,8 @@
         </h1>
 
         <p>
-          Create, update and manage all events in VenueFlow.
+          Create, update, manage events and configure
+          event seating in VenueFlow.
         </p>
 
       </div>
@@ -510,6 +511,18 @@
                 </div>
 
                 <div class="row-actions">
+
+                  <button
+                    type="button"
+                    class="seat-button"
+                    (click)="manageSeats(event)"
+                    [disabled]="
+                      deletingId() === event.id
+                    "
+                  >
+                    Manage Seats
+                  </button>
+
 
                   <button
                     type="button"

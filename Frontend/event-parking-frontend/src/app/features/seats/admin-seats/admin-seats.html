@@ -5,18 +5,18 @@
     @if (isLoading()) {
 
       <div class="state-card">
+
         <div class="spinner"></div>
 
         <h2>
           Loading seat management...
         </h2>
+
       </div>
 
     }
 
-    @else if (
-      !event()
-    ) {
+    @else if (!event()) {
 
       <div class="state-card">
 
@@ -44,10 +44,7 @@
 
     }
 
-    @else if (
-      event();
-      as event
-    ) {
+    @else if (event(); as event) {
 
       <button
         type="button"
@@ -63,7 +60,7 @@
         <div>
 
           <span class="page-kicker">
-            VENUEFLOW ADMIN
+            EVENTIGO ADMIN
           </span>
 
           <h1>
@@ -71,7 +68,7 @@
           </h1>
 
           <p>
-            Manage the seat map for
+            Manage the seat layout for
             <strong>
               {{ event.name }}
             </strong>.
@@ -148,26 +145,21 @@
 
         <div>
           <small>
-            BASE PRICE
+            CAPACITY
           </small>
 
           <strong>
-            LKR
-            {{
-              event.ticketPrice
-                | number:'1.0-2'
-            }}
+            {{ event.capacity }}
           </strong>
         </div>
 
       </section>
 
 
-      <!-- STATS -->
-
       <section class="stats-grid">
 
         <article>
+
           <span>
             Total Seats
           </span>
@@ -175,9 +167,12 @@
           <strong>
             {{ seats().length }}
           </strong>
+
         </article>
 
+
         <article class="available">
+
           <span>
             Available
           </span>
@@ -185,9 +180,12 @@
           <strong>
             {{ availableCount() }}
           </strong>
+
         </article>
 
+
         <article class="held">
+
           <span>
             Held
           </span>
@@ -195,9 +193,12 @@
           <strong>
             {{ heldCount() }}
           </strong>
+
         </article>
 
+
         <article class="booked">
+
           <span>
             Booked
           </span>
@@ -205,16 +206,13 @@
           <strong>
             {{ bookedCount() }}
           </strong>
+
         </article>
 
       </section>
 
 
-      <!-- MESSAGES -->
-
-      @if (
-        successMessage()
-      ) {
+      @if (successMessage()) {
 
         <div class="message success">
           ✓ {{ successMessage() }}
@@ -223,9 +221,7 @@
       }
 
 
-      @if (
-        errorMessage()
-      ) {
+      @if (errorMessage()) {
 
         <div class="message error">
           ! {{ errorMessage() }}
@@ -234,7 +230,491 @@
       }
 
 
-      <!-- GENERATE FORM -->
+      <!-- ==========================================
+           LAYOUT SELECTOR
+           ========================================== -->
+
+      <section class="layout-card">
+
+        <div class="layout-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              VISUAL LAYOUT
+            </span>
+
+            <h2>
+              Choose seat layout
+            </h2>
+
+            <p>
+              Select how the seats should
+              appear for this event.
+            </p>
+
+          </div>
+
+
+          <div class="current-layout">
+
+            <span>
+              Selected
+            </span>
+
+            <strong>
+              {{ selectedLayout() }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="layout-options">
+
+          @for (
+            layout of layoutOptions;
+            track layout.type
+          ) {
+
+            <button
+              type="button"
+              class="layout-option"
+              [class.selected]="
+                selectedLayout()
+                ===
+                layout.type
+              "
+              (click)="
+                selectLayout(
+                  layout.type
+                )
+              "
+            >
+
+              <span class="layout-icon">
+                {{ layout.icon }}
+              </span>
+
+              <strong>
+                {{ layout.title }}
+              </strong>
+
+              <small>
+                {{ layout.description }}
+              </small>
+
+              @if (
+                selectedLayout()
+                ===
+                layout.type
+              ) {
+
+                <span class="selected-check">
+                  ✓ Selected
+                </span>
+
+              }
+
+            </button>
+
+          }
+
+        </div>
+
+
+        <div class="layout-save-row">
+
+          <p>
+            Changing the layout changes only
+            the visual arrangement. Existing
+            seats and bookings remain unchanged.
+          </p>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="isSaving()"
+            (click)="saveLayout()"
+          >
+
+            @if (isSaving()) {
+              Saving...
+            } @else {
+              Save Layout
+            }
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- ==========================================
+           LIVE VISUAL MAP
+           ========================================== -->
+
+      <section
+        id="visual-seat-map"
+        class="visual-map-card"
+      >
+
+        <div class="visual-map-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              LIVE PREVIEW
+            </span>
+
+            <h2>
+              {{ selectedLayout() }}
+              Seat Map
+            </h2>
+
+          </div>
+
+
+          <div class="legend">
+
+            <span>
+              <i class="legend-dot available"></i>
+              Available
+            </span>
+
+            <span>
+              <i class="legend-dot held"></i>
+              Held
+            </span>
+
+            <span>
+              <i class="legend-dot booked"></i>
+              Booked
+            </span>
+
+          </div>
+
+        </div>
+
+
+        @if (
+          seats().length === 0
+        ) {
+
+          <div class="visual-empty">
+
+            <div>
+              🪑
+            </div>
+
+            <h3>
+              No seats configured
+            </h3>
+
+            <p>
+              Generate the seat map and
+              the visual arrangement will
+              appear here immediately.
+            </p>
+
+          </div>
+
+        }
+
+        @else {
+
+          <div class="seat-map-scroll">
+
+
+            <!-- =====================================
+                 THEATRE
+                 ===================================== -->
+
+            @if (
+              selectedLayout()
+              ===
+              'Theatre'
+            ) {
+
+              <div class="theatre-map">
+
+                <div class="stage">
+
+                  <span>
+                    STAGE
+                  </span>
+
+                </div>
+
+
+                <div class="normal-seat-rows">
+
+                  @for (
+                    row of seatRows();
+                    track row.rowLabel
+                  ) {
+
+                    <div class="normal-seat-row">
+
+                      <span class="row-label">
+                        {{ row.rowLabel }}
+                      </span>
+
+                      <div class="normal-row-seats">
+
+                        @for (
+                          seat of row.seats;
+                          track seat.id
+                        ) {
+
+                          <div
+                            class="seat-box"
+                            [class.available]="
+                              seat.status
+                              ===
+                              SeatStatus.Available
+                            "
+                            [class.held]="
+                              seat.status
+                              ===
+                              SeatStatus.Held
+                            "
+                            [class.booked]="
+                              seat.status
+                              ===
+                              SeatStatus.Booked
+                            "
+                            [title]="
+                              seat.seatNumber
+                            "
+                          >
+                            {{ seat.seatNumber }}
+                          </div>
+
+                        }
+
+                      </div>
+
+                    </div>
+
+                  }
+
+                </div>
+
+              </div>
+
+            }
+
+
+            <!-- =====================================
+                 STADIUM
+                 ===================================== -->
+
+            @else if (
+              selectedLayout()
+              ===
+              'Stadium'
+            ) {
+
+              <div class="stadium-map">
+
+                <div class="stadium-track"></div>
+
+
+                <div class="sports-field">
+
+                  <div class="field-half-line"></div>
+
+                  <div class="field-centre-circle"></div>
+
+                  <span>
+                    SPORTS FIELD
+                  </span>
+
+                </div>
+
+
+                @for (
+                  item of stadiumSeatPositions();
+                  track item.seat.id
+                ) {
+
+                  <div
+                    class="seat-box positioned-seat"
+                    [class.available]="
+                      item.seat.status
+                      ===
+                      SeatStatus.Available
+                    "
+                    [class.held]="
+                      item.seat.status
+                      ===
+                      SeatStatus.Held
+                    "
+                    [class.booked]="
+                      item.seat.status
+                      ===
+                      SeatStatus.Booked
+                    "
+                    [style.left.%]="
+                      item.x
+                    "
+                    [style.top.%]="
+                      item.y
+                    "
+                    [title]="
+                      item.seat.seatNumber
+                    "
+                  >
+                    {{ item.seat.seatNumber }}
+                  </div>
+
+                }
+
+              </div>
+
+            }
+
+
+            <!-- =====================================
+                 ARENA
+                 ===================================== -->
+
+            @else if (
+              selectedLayout()
+              ===
+              'Arena'
+            ) {
+
+              <div class="arena-map">
+
+                <div class="arena-ring-decoration"></div>
+
+                <div class="arena-centre">
+
+                  <span>
+                    ARENA
+                  </span>
+
+                </div>
+
+
+                @for (
+                  item of arenaSeatPositions();
+                  track item.seat.id
+                ) {
+
+                  <div
+                    class="seat-box positioned-seat arena-positioned-seat"
+                    [class.available]="
+                      item.seat.status
+                      ===
+                      SeatStatus.Available
+                    "
+                    [class.held]="
+                      item.seat.status
+                      ===
+                      SeatStatus.Held
+                    "
+                    [class.booked]="
+                      item.seat.status
+                      ===
+                      SeatStatus.Booked
+                    "
+                    [style.left.%]="
+                      item.x
+                    "
+                    [style.top.%]="
+                      item.y
+                    "
+                    [title]="
+                      item.seat.seatNumber
+                    "
+                  >
+                    {{ item.seat.seatNumber }}
+                  </div>
+
+                }
+
+              </div>
+
+            }
+
+
+            <!-- =====================================
+                 GRID
+                 ===================================== -->
+
+            @else {
+
+              <div class="grid-map">
+
+                @for (
+                  row of seatRows();
+                  track row.rowLabel
+                ) {
+
+                  <div class="normal-seat-row">
+
+                    <span class="row-label">
+                      {{ row.rowLabel }}
+                    </span>
+
+                    <div class="normal-row-seats">
+
+                      @for (
+                        seat of row.seats;
+                        track seat.id
+                      ) {
+
+                        <div
+                          class="seat-box"
+                          [class.available]="
+                            seat.status
+                            ===
+                            SeatStatus.Available
+                          "
+                          [class.held]="
+                            seat.status
+                            ===
+                            SeatStatus.Held
+                          "
+                          [class.booked]="
+                            seat.status
+                            ===
+                            SeatStatus.Booked
+                          "
+                          [title]="
+                            seat.seatNumber
+                          "
+                        >
+                          {{ seat.seatNumber }}
+                        </div>
+
+                      }
+
+                    </div>
+
+                  </div>
+
+                }
+
+              </div>
+
+            }
+
+          </div>
+
+        }
+
+      </section>
+
+
+      <!-- ==========================================
+           GENERATE FORM
+           ========================================== -->
 
       @if (
         showGenerateForm()
@@ -245,13 +725,15 @@
           <div class="form-heading">
 
             <div>
+
               <span class="section-kicker">
                 AUTO GENERATE
               </span>
 
               <h2>
-                Generate seat map
+                Generate Seat Map
               </h2>
+
             </div>
 
             <button
@@ -261,6 +743,26 @@
             >
               ×
             </button>
+
+          </div>
+
+
+          <div class="capacity-notice">
+
+            Event capacity:
+
+            <strong>
+              {{ event.capacity }}
+            </strong>
+
+            seats.
+
+            Rows × Seats Per Row
+            must equal
+
+            <strong>
+              {{ event.capacity }}
+            </strong>.
 
           </div>
 
@@ -330,14 +832,32 @@
           </div>
 
 
-          <div class="form-info">
+          <div
+            class="form-info"
+            [class.invalid-total]="
+              (
+                generateRows
+                *
+                generateSeatsPerRow
+              )
+              !==
+              event.capacity
+            "
+          >
 
-            {{
-              generateRows
-              *
-              generateSeatsPerRow
-            }}
-            seats will be requested.
+            Requested:
+
+            <strong>
+              {{
+                generateRows
+                *
+                generateSeatsPerRow
+              }}
+            </strong>
+
+            seats /
+
+            {{ event.capacity }}
 
           </div>
 
@@ -360,9 +880,7 @@
               (click)="generateSeatMap()"
             >
 
-              @if (
-                isSaving()
-              ) {
+              @if (isSaving()) {
                 Generating...
               } @else {
                 Generate Seats
@@ -377,7 +895,9 @@
       }
 
 
-      <!-- CREATE FORM -->
+      <!-- ==========================================
+           CREATE SEAT
+           ========================================== -->
 
       @if (
         showCreateForm()
@@ -394,7 +914,7 @@
               </span>
 
               <h2>
-                Add single seat
+                Add Single Seat
               </h2>
 
             </div>
@@ -413,6 +933,7 @@
           <div class="form-grid">
 
             <label>
+
               <span>
                 Seat Number *
               </span>
@@ -420,12 +941,14 @@
               <input
                 type="text"
                 [(ngModel)]="createSeatNumber"
-                placeholder="P1"
+                placeholder="A1"
               >
+
             </label>
 
 
             <label>
+
               <span>
                 Row Label *
               </span>
@@ -433,12 +956,14 @@
               <input
                 type="text"
                 [(ngModel)]="createRowLabel"
-                placeholder="P"
+                placeholder="A"
               >
+
             </label>
 
 
             <label>
+
               <span>
                 Column Number *
               </span>
@@ -447,12 +972,13 @@
                 type="number"
                 min="1"
                 [(ngModel)]="createColumnNumber"
-                placeholder="1"
               >
+
             </label>
 
 
             <label>
+
               <span>
                 Seat Type
               </span>
@@ -460,12 +986,13 @@
               <input
                 type="text"
                 [(ngModel)]="createSeatType"
-                placeholder="Regular"
               >
+
             </label>
 
 
             <label>
+
               <span>
                 Price Override
               </span>
@@ -474,8 +1001,8 @@
                 type="number"
                 min="0"
                 [(ngModel)]="createPriceOverride"
-                placeholder="Use event price"
               >
+
             </label>
 
           </div>
@@ -499,9 +1026,7 @@
               (click)="createSeat()"
             >
 
-              @if (
-                isSaving()
-              ) {
+              @if (isSaving()) {
                 Creating...
               } @else {
                 Create Seat
@@ -516,7 +1041,9 @@
       }
 
 
-      <!-- EDIT FORM -->
+      <!-- ==========================================
+           EDIT
+           ========================================== -->
 
       @if (
         editingSeatId()
@@ -533,7 +1060,7 @@
               </span>
 
               <h2>
-                Update seat information
+                Update Seat
               </h2>
 
             </div>
@@ -615,14 +1142,6 @@
           </div>
 
 
-          <p class="form-note">
-            Seat status is controlled by
-            booking availability and is
-            not part of the seat update
-            API.
-          </p>
-
-
           <div class="form-actions">
 
             <button
@@ -641,9 +1160,7 @@
               (click)="saveEdit()"
             >
 
-              @if (
-                isSaving()
-              ) {
+              @if (isSaving()) {
                 Saving...
               } @else {
                 Save Changes
@@ -658,7 +1175,9 @@
       }
 
 
-      <!-- TABLE -->
+      <!-- ==========================================
+           INVENTORY
+           ========================================== -->
 
       <section class="table-card">
 
@@ -671,14 +1190,16 @@
             </span>
 
             <h2>
-              All seats
+              All Seats
             </h2>
 
           </div>
 
           <span class="seat-count">
+
             {{ seats().length }}
             seats
+
           </span>
 
         </div>
@@ -699,8 +1220,8 @@
             </h3>
 
             <p>
-              Generate a complete seat
-              map or add individual seats.
+              Generate seats to create
+              the visual seat map.
             </p>
 
           </div>
@@ -714,35 +1235,27 @@
             <table>
 
               <thead>
+
                 <tr>
-                  <th>
-                    Seat
-                  </th>
 
-                  <th>
-                    Row
-                  </th>
+                  <th>Seat</th>
 
-                  <th>
-                    Column
-                  </th>
+                  <th>Row</th>
 
-                  <th>
-                    Type
-                  </th>
+                  <th>Column</th>
 
-                  <th>
-                    Price
-                  </th>
+                  <th>Type</th>
 
-                  <th>
-                    Status
-                  </th>
+                  <th>Price</th>
+
+                  <th>Status</th>
 
                   <th class="actions-cell">
                     Actions
                   </th>
+
                 </tr>
+
               </thead>
 
 
@@ -756,9 +1269,11 @@
                   <tr>
 
                     <td>
+
                       <strong class="seat-number">
                         {{ seat.seatNumber }}
                       </strong>
+
                     </td>
 
                     <td>
@@ -772,14 +1287,16 @@
                     <td>
                       {{
                         seat.seatType
-                        || 'Regular'
+                        ||
+                        'Regular'
                       }}
                     </td>
 
                     <td>
 
                       @if (
-                        seat.priceOverride !==
+                        seat.priceOverride
+                        !==
                         null
                       ) {
 
@@ -789,7 +1306,9 @@
                             | number:'1.0-2'
                         }}
 
-                      } @else {
+                      }
+
+                      @else {
 
                         <span class="default-price">
                           Event price
@@ -803,12 +1322,20 @@
 
                       <span
                         class="status-badge"
-                        [class]="
-                          'status-badge '
-                          +
-                          getStatusClass(
-                            seat.status
-                          )
+                        [class.available]="
+                          seat.status
+                          ===
+                          SeatStatus.Available
+                        "
+                        [class.held]="
+                          seat.status
+                          ===
+                          SeatStatus.Held
+                        "
+                        [class.booked]="
+                          seat.status
+                          ===
+                          SeatStatus.Booked
                         "
                       >
                         {{
@@ -819,7 +1346,6 @@
                       </span>
 
                     </td>
-
 
                     <td class="actions-cell">
 
@@ -832,15 +1358,15 @@
                         Edit
                       </button>
 
-
                       <button
                         type="button"
                         class="table-button delete"
                         [disabled]="
                           isSaving()
                           ||
-                          seat.status !==
-                            SeatStatus.Available
+                          seat.status
+                          !==
+                          SeatStatus.Available
                         "
                         (click)="deleteSeat(seat)"
                       >

@@ -28,7 +28,9 @@
 }
 
 
-/* HEADER */
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .page-header {
   display: flex;
@@ -119,7 +121,9 @@
 }
 
 
-/* MESSAGES */
+/* =========================================================
+   MESSAGES
+   ========================================================= */
 
 .success-message,
 .error-message {
@@ -151,7 +155,9 @@
 }
 
 
-/* MAIN CARDS */
+/* =========================================================
+   MAIN CARDS
+   ========================================================= */
 
 .form-card,
 .events-card {
@@ -202,7 +208,9 @@
 }
 
 
-/* FORM */
+/* =========================================================
+   FORM
+   ========================================================= */
 
 .form-grid {
   display: grid;
@@ -345,7 +353,9 @@
 }
 
 
-/* EVENT GRID */
+/* =========================================================
+   EVENT GRID
+   ========================================================= */
 
 .event-grid {
   display: grid;
@@ -474,15 +484,19 @@
 }
 
 
-/* ACTION BUTTONS */
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
 
 .row-actions {
   display: flex;
+  flex-wrap: wrap;
 
   gap: 8px;
 }
 
 
+.seat-button,
 .edit-button,
 .delete-button {
   padding: 8px 12px;
@@ -498,7 +512,16 @@
 
   transition:
     transform 0.2s ease,
-    opacity 0.2s ease;
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.seat-button {
+  color: #047857;
+  background: #d1fae5;
+
+  border: 1px solid #a7f3d0;
 }
 
 
@@ -514,12 +537,22 @@
 }
 
 
+.seat-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 6px 14px
+    rgba(5, 150, 105, 0.12);
+}
+
+
 .edit-button:hover:not(:disabled),
 .delete-button:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
 
+.seat-button:disabled,
 .edit-button:disabled,
 .delete-button:disabled {
   opacity: 0.5;
@@ -527,7 +560,9 @@
 }
 
 
-/* LOADING */
+/* =========================================================
+   LOADING
+   ========================================================= */
 
 .loading-card {
   display: flex;
@@ -565,7 +600,9 @@
 }
 
 
-/* EMPTY */
+/* =========================================================
+   EMPTY
+   ========================================================= */
 
 .empty-state {
   padding: 55px 20px;
@@ -590,7 +627,9 @@
 }
 
 
-/* RESPONSIVE */
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
 @media (
   max-width: 1000px
@@ -657,9 +696,12 @@
   }
 
 
+  .seat-button,
   .edit-button,
   .delete-button {
     flex: 1;
+
+    min-width: 100px;
   }
 
 }
