@@ -21,6 +21,10 @@ import {
 } from '@angular/common/http';
 
 import {
+  Router
+} from '@angular/router';
+
+import {
   finalize,
   forkJoin
 } from 'rxjs';
@@ -81,6 +85,9 @@ export class AdminEvents
 
   private readonly fb =
     inject(FormBuilder);
+
+  private readonly router =
+    inject(Router);
 
 
   readonly events =
@@ -355,6 +362,19 @@ export class AdminEvents
   }
 
 
+  manageSeats(
+    event: Event
+  ): void {
+
+    this.router.navigate([
+      '/admin/events',
+      event.id,
+      'seats'
+    ]);
+
+  }
+
+
   saveEvent(): void {
 
     this.successMessage.set('');
@@ -470,45 +490,45 @@ export class AdminEvents
       EventCreateRequest |
       EventUpdateRequest = {
 
-        name,
+      name,
 
-        description:
-          description.length > 0
-            ? description
-            : null,
+      description:
+        description.length > 0
+          ? description
+          : null,
 
-        venueId:
-          Number(
-            formValue.venueId
-          ),
+      venueId:
+        Number(
+          formValue.venueId
+        ),
 
-        categoryId:
-          Number(
-            formValue.categoryId
-          ),
+      categoryId:
+        Number(
+          formValue.categoryId
+        ),
 
-        startDateTime:
-          formValue.startDateTime,
+      startDateTime:
+        formValue.startDateTime,
 
-        endDateTime:
-          formValue.endDateTime,
+      endDateTime:
+        formValue.endDateTime,
 
-        ticketPrice:
-          Number(
-            formValue.ticketPrice
-          ),
+      ticketPrice:
+        Number(
+          formValue.ticketPrice
+        ),
 
-        parkingFee:
-          Number(
-            formValue.parkingFee
-          ),
+      parkingFee:
+        Number(
+          formValue.parkingFee
+        ),
 
-        capacity:
-          Number(
-            formValue.capacity
-          )
+      capacity:
+        Number(
+          formValue.capacity
+        )
 
-      };
+    };
 
 
     const editingId =

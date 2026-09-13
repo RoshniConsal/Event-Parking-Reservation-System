@@ -30,7 +30,8 @@ import {
 } from 'rxjs';
 
 import {
-  Event
+  Event,
+  SeatLayoutType
 } from '../../../core/models/event.model';
 
 import {
@@ -48,6 +49,18 @@ import {
 import {
   SeatService
 } from '../../../core/services/seat';
+
+
+interface SeatRow {
+  rowLabel: string;
+  seats: Seat[];
+}
+
+interface PositionedSeat {
+  seat: Seat;
+  x: number;
+  y: number;
+}
 
 
 @Component({
@@ -110,8 +123,51 @@ export class AdminSeats
     signal<number | null>(null);
 
 
+  readonly selectedLayout =
+    signal<SeatLayoutType>(
+      'Theatre'
+    );
+
+
   readonly SeatStatus =
     SeatStatus;
+
+
+  readonly layoutOptions: {
+    type: SeatLayoutType;
+    title: string;
+    description: string;
+    icon: string;
+  }[] = [
+    {
+      type: 'Theatre',
+      title: 'Theatre',
+      description:
+        'Stage in front with straight seat rows.',
+      icon: '🎭'
+    },
+    {
+      type: 'Stadium',
+      title: 'Stadium / Oval',
+      description:
+        'Sports field with curved seating around it.',
+      icon: '🏟️'
+    },
+    {
+      type: 'Arena',
+      title: 'Arena / Circular',
+      description:
+        'Central arena surrounded by seat rings.',
+      icon: '⭕'
+    },
+    {
+      type: 'Grid',
+      title: 'Standard Grid',
+      description:
+        'Simple row and column seating arrangement.',
+      icon: '▦'
+    }
+  ];
 
 
   /* =========================================================
@@ -125,7 +181,8 @@ export class AdminSeats
   createColumnNumber:
     number | null = null;
 
-  createSeatType = 'Regular';
+  createSeatType =
+    'Regular';
 
   createPriceOverride:
     number | null = null;
@@ -139,7 +196,8 @@ export class AdminSeats
 
   generateSeatsPerRow = 10;
 
-  generateSeatType = 'Regular';
+  generateSeatType =
+    'Regular';
 
   generatePriceOverride:
     number | null = null;
@@ -163,7 +221,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     COMPUTED
+     SORTED SEATS
      ========================================================= */
 
   readonly sortedSeats =
@@ -187,27 +245,457 @@ export class AdminSeats
                 }
               );
 
-
           if (
             rowCompare !== 0
           ) {
 
             return rowCompare;
-
           }
-
 
           return (
             first.columnNumber
             -
             second.columnNumber
           );
+        }
+      );
+    });
 
+
+  /* =========================================================
+     GROUP INTO ROWS
+     ========================================================= */
+
+  readonly seatRows =
+    computed<SeatRow[]>(() => {
+
+      const map =
+        new Map<
+          string,
+          Seat[]
+        >();
+
+
+      for (
+        const seat of
+        this.sortedSeats()
+      ) {
+
+        const current =
+          map.get(
+            seat.rowLabel
+          );
+
+        if (current) {
+
+          current.push(
+            seat
+          );
+
+        } else {
+
+          map.set(
+            seat.rowLabel,
+            [seat]
+          );
+        }
+      }
+
+
+      return Array.from(
+        map.entries()
+      ).map(
+        (
+          [
+            rowLabel,
+            rowSeats
+          ]
+        ) => ({
+
+          rowLabel,
+
+          seats:
+            rowSeats.sort(
+              (
+                first,
+                second
+              ) =>
+                first.columnNumber
+                -
+                second.columnNumber
+            )
+        })
+      );
+    });
+
+
+  /* =========================================================
+     STADIUM OVAL POSITIONS
+     ========================================================= */
+
+  readonly stadiumSeatPositions =
+    computed<PositionedSeat[]>(() => {
+
+      const rows =
+        this.seatRows();
+
+      const positions:
+        PositionedSeat[] = [];
+
+
+      if (
+        rows.length === 0
+      ) {
+
+        return positions;
+      }
+
+
+      const splitIndex =
+        Math.ceil(
+          rows.length / 2
+        );
+
+
+      const topRows =
+        rows.slice(
+          0,
+          splitIndex
+        );
+
+
+      const bottomRows =
+        rows.slice(
+          splitIndex
+        );
+
+
+      /*
+        TOP HALF
+
+        Each row follows a different
+        elliptical arc.
+
+        First row = outer
+        Last top row = inner
+      */
+
+      topRows.forEach(
+        (
+          row,
+          rowIndex
+        ) => {
+
+          const radiusX =
+            44
+            -
+            rowIndex * 1.9;
+
+
+          const radiusY =
+            38
+            -
+            rowIndex * 2.0;
+
+
+          row.seats.forEach(
+            (
+              seat,
+              seatIndex
+            ) => {
+
+              const progress =
+                row.seats.length <= 1
+                  ? 0.5
+                  : seatIndex /
+                    (
+                      row.seats.length
+                      -
+                      1
+                    );
+
+
+              /*
+                Upper ellipse:
+                205° -> 335°
+              */
+
+              const angle =
+                205
+                +
+                progress * 130;
+
+
+              const radians =
+                angle
+                *
+                Math.PI
+                /
+                180;
+
+
+              const x =
+                50
+                +
+                radiusX
+                *
+                Math.cos(
+                  radians
+                );
+
+
+              const y =
+                50
+                +
+                radiusY
+                *
+                Math.sin(
+                  radians
+                );
+
+
+              positions.push({
+                seat,
+                x,
+                y
+              });
+            }
+          );
         }
       );
 
+
+      /*
+        BOTTOM HALF
+
+        First bottom row = inner
+        Last bottom row = outer
+      */
+
+      bottomRows.forEach(
+        (
+          row,
+          rowIndex
+        ) => {
+
+          const reverseIndex =
+            bottomRows.length
+            -
+            1
+            -
+            rowIndex;
+
+
+          const radiusX =
+            44
+            -
+            reverseIndex * 1.9;
+
+
+          const radiusY =
+            38
+            -
+            reverseIndex * 2.0;
+
+
+          row.seats.forEach(
+            (
+              seat,
+              seatIndex
+            ) => {
+
+              const progress =
+                row.seats.length <= 1
+                  ? 0.5
+                  : seatIndex /
+                    (
+                      row.seats.length
+                      -
+                      1
+                    );
+
+
+              /*
+                Lower ellipse:
+                25° -> 155°
+              */
+
+              const angle =
+                25
+                +
+                progress * 130;
+
+
+              const radians =
+                angle
+                *
+                Math.PI
+                /
+                180;
+
+
+              const x =
+                50
+                +
+                radiusX
+                *
+                Math.cos(
+                  radians
+                );
+
+
+              const y =
+                50
+                +
+                radiusY
+                *
+                Math.sin(
+                  radians
+                );
+
+
+              positions.push({
+                seat,
+                x,
+                y
+              });
+            }
+          );
+        }
+      );
+
+
+      return positions;
     });
 
+
+  /* =========================================================
+     ARENA RING POSITIONS
+     ========================================================= */
+
+  readonly arenaSeatPositions =
+    computed<PositionedSeat[]>(() => {
+
+      const rows =
+        this.seatRows();
+
+      const positions:
+        PositionedSeat[] = [];
+
+
+      if (
+        rows.length === 0
+      ) {
+
+        return positions;
+      }
+
+
+      rows.forEach(
+        (
+          row,
+          rowIndex
+        ) => {
+
+          const denominator =
+            Math.max(
+              rows.length - 1,
+              1
+            );
+
+
+          const progress =
+            rowIndex /
+            denominator;
+
+
+          /*
+            A row = inner ring
+            Last row = outer ring
+          */
+
+          const radiusX =
+            18
+            +
+            progress * 27;
+
+
+          const radiusY =
+            18
+            +
+            progress * 27;
+
+
+          row.seats.forEach(
+            (
+              seat,
+              seatIndex
+            ) => {
+
+              const seatCount =
+                Math.max(
+                  row.seats.length,
+                  1
+                );
+
+
+              const angle =
+                -90
+                +
+                (
+                  360 /
+                  seatCount
+                )
+                *
+                seatIndex;
+
+
+              const radians =
+                angle
+                *
+                Math.PI
+                /
+                180;
+
+
+              const x =
+                50
+                +
+                radiusX
+                *
+                Math.cos(
+                  radians
+                );
+
+
+              const y =
+                50
+                +
+                radiusY
+                *
+                Math.sin(
+                  radians
+                );
+
+
+              positions.push({
+                seat,
+                x,
+                y
+              });
+            }
+          );
+        }
+      );
+
+
+      return positions;
+    });
+
+
+  /* =========================================================
+     COUNTS
+     ========================================================= */
 
   readonly availableCount =
     computed(() =>
@@ -219,7 +707,6 @@ export class AdminSeats
             SeatStatus.Available
         )
         .length
-
     );
 
 
@@ -233,7 +720,6 @@ export class AdminSeats
             SeatStatus.Held
         )
         .length
-
     );
 
 
@@ -247,7 +733,6 @@ export class AdminSeats
             SeatStatus.Booked
         )
         .length
-
     );
 
 
@@ -260,7 +745,9 @@ export class AdminSeats
     const eventIdValue =
       this.route.snapshot
         .paramMap
-        .get('eventId');
+        .get(
+          'eventId'
+        );
 
 
     const eventId =
@@ -270,12 +757,18 @@ export class AdminSeats
 
 
     if (
-      !eventIdValue ||
-      Number.isNaN(eventId) ||
+      !eventIdValue
+      ||
+      Number.isNaN(
+        eventId
+      )
+      ||
       eventId <= 0
     ) {
 
-      this.isLoading.set(false);
+      this.isLoading.set(
+        false
+      );
 
       this.errorMessage.set(
         'Invalid event.'
@@ -299,16 +792,22 @@ export class AdminSeats
     eventId: number
   ): void {
 
-    this.isLoading.set(true);
+    this.isLoading.set(
+      true
+    );
 
-    this.errorMessage.set('');
+    this.errorMessage.set(
+      ''
+    );
 
 
     forkJoin({
 
       event:
         this.eventService
-          .getById(eventId),
+          .getById(
+            eventId
+          ),
 
       seats:
         this.seatService
@@ -322,7 +821,9 @@ export class AdminSeats
 
         finalize(() => {
 
-          this.isLoading.set(false);
+          this.isLoading.set(
+            false
+          );
 
         })
 
@@ -335,6 +836,15 @@ export class AdminSeats
             response.event
           );
 
+
+          this.selectedLayout.set(
+            response.event
+              .seatLayoutType
+            ||
+            'Theatre'
+          );
+
+
           this.seats.set(
             response.seats
           );
@@ -343,12 +853,17 @@ export class AdminSeats
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
-          this.event.set(null);
+          this.event.set(
+            null
+          );
 
-          this.seats.set([]);
+          this.seats.set(
+            []
+          );
 
           this.errorMessage.set(
             this.getErrorMessage(
@@ -363,7 +878,122 @@ export class AdminSeats
 
 
   /* =========================================================
-     OPEN CREATE
+     LAYOUT
+     ========================================================= */
+
+  selectLayout(
+    layout:
+      SeatLayoutType
+  ): void {
+
+    this.selectedLayout.set(
+      layout
+    );
+
+    this.clearMessages();
+  }
+
+
+  saveLayout(): void {
+
+    const currentEvent =
+      this.event();
+
+
+    if (
+      !currentEvent
+    ) {
+
+      return;
+    }
+
+
+    this.isSaving.set(
+      true
+    );
+
+    this.clearMessages();
+
+
+    this.eventService
+      .updateSeatLayout(
+        currentEvent.id,
+        this.selectedLayout()
+      )
+      .pipe(
+
+        finalize(() => {
+
+          this.isSaving.set(
+            false
+          );
+
+        })
+
+      )
+      .subscribe({
+
+        next: updatedEvent => {
+
+          /*
+            Keep old navigation names if
+            backend PATCH response does not
+            populate them.
+          */
+
+          this.event.set({
+
+            ...currentEvent,
+
+            ...updatedEvent,
+
+            venueName:
+              updatedEvent.venueName
+              ||
+              currentEvent.venueName,
+
+            categoryName:
+              updatedEvent.categoryName
+              ||
+              currentEvent.categoryName
+
+          });
+
+
+          this.selectedLayout.set(
+            updatedEvent
+              .seatLayoutType
+            ||
+            this.selectedLayout()
+          );
+
+
+          this.successMessage.set(
+            `${this.selectedLayout()} layout saved successfully.`
+          );
+
+        },
+
+
+        error: (
+          error:
+            HttpErrorResponse
+        ) => {
+
+          this.errorMessage.set(
+            this.getErrorMessage(
+              error
+            )
+          );
+
+        }
+
+      });
+  }
+
+
+  /* =========================================================
+     CREATE FORM
      ========================================================= */
 
   openCreateForm(): void {
@@ -395,7 +1025,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     CREATE SINGLE SEAT
+     CREATE SEAT
      ========================================================= */
 
   createSeat(): void {
@@ -404,16 +1034,20 @@ export class AdminSeats
       this.event();
 
 
-    if (!currentEvent) {
+    if (
+      !currentEvent
+    ) {
 
       return;
     }
 
 
     if (
-      !this.createSeatNumber.trim()
+      !this.createSeatNumber
+        .trim()
       ||
-      !this.createRowLabel.trim()
+      !this.createRowLabel
+        .trim()
       ||
       this.createColumnNumber ===
         null
@@ -429,7 +1063,9 @@ export class AdminSeats
     }
 
 
-    this.isSaving.set(true);
+    this.isSaving.set(
+      true
+    );
 
     this.clearMessages();
 
@@ -453,18 +1089,20 @@ export class AdminSeats
           seatType:
             this.createSeatType
               .trim()
-            || null,
+            ||
+            null,
 
           priceOverride:
             this.createPriceOverride
-
         }
       )
       .pipe(
 
         finalize(() => {
 
-          this.isSaving.set(false);
+          this.isSaving.set(
+            false
+          );
 
         })
 
@@ -481,11 +1119,6 @@ export class AdminSeats
           );
 
 
-          this.successMessage.set(
-            `Seat ${createdSeat.seatNumber} created successfully.`
-          );
-
-
           this.showCreateForm.set(
             false
           );
@@ -493,11 +1126,17 @@ export class AdminSeats
 
           this.resetCreateForm();
 
+
+          this.successMessage.set(
+            `Seat ${createdSeat.seatNumber} created successfully.`
+          );
+
         },
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
           this.errorMessage.set(
@@ -552,7 +1191,9 @@ export class AdminSeats
       this.event();
 
 
-    if (!currentEvent) {
+    if (
+      !currentEvent
+    ) {
 
       return;
     }
@@ -572,25 +1213,40 @@ export class AdminSeats
     }
 
 
+    const totalSeats =
+      this.generateRows
+      *
+      this.generateSeatsPerRow;
+
+
+    if (
+      totalSeats !==
+      currentEvent.capacity
+    ) {
+
+      this.errorMessage.set(
+        `Rows × seats per row must exactly equal the event capacity of ${currentEvent.capacity}. Current total is ${totalSeats}.`
+      );
+
+      return;
+    }
+
+
     if (
       this.seats().length > 0
     ) {
 
-      const confirmed =
-        window.confirm(
-          'This event already has seats. Generating another map may create duplicate seats and the backend may reject it. Continue?'
-        );
+      this.errorMessage.set(
+        'A seat map already exists for this event. Existing seats must be removed before generating another map.'
+      );
 
-
-      if (!confirmed) {
-
-        return;
-
-      }
+      return;
     }
 
 
-    this.isSaving.set(true);
+    this.isSaving.set(
+      true
+    );
 
     this.clearMessages();
 
@@ -602,14 +1258,17 @@ export class AdminSeats
         this.generateSeatsPerRow,
         this.generateSeatType
           .trim()
-        || null,
+        ||
+        null,
         this.generatePriceOverride
       )
       .pipe(
 
         finalize(() => {
 
-          this.isSaving.set(false);
+          this.isSaving.set(
+            false
+          );
 
         })
 
@@ -623,6 +1282,11 @@ export class AdminSeats
           );
 
 
+          this.showGenerateForm.set(
+            false
+          );
+
+
           this.successMessage.set(
             response.message
             ||
@@ -630,15 +1294,27 @@ export class AdminSeats
           );
 
 
-          this.showGenerateForm.set(
-            false
-          );
+          setTimeout(() => {
+
+            document
+              .getElementById(
+                'visual-seat-map'
+              )
+              ?.scrollIntoView({
+                behavior:
+                  'smooth',
+                block:
+                  'start'
+              });
+
+          }, 100);
 
         },
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
           this.errorMessage.set(
@@ -685,7 +1361,8 @@ export class AdminSeats
 
     this.editSeatType =
       seat.seatType
-      || '';
+      ||
+      '';
 
     this.editPriceOverride =
       seat.priceOverride;
@@ -709,16 +1386,20 @@ export class AdminSeats
       this.editingSeatId();
 
 
-    if (!seatId) {
+    if (
+      !seatId
+    ) {
 
       return;
     }
 
 
     if (
-      !this.editSeatNumber.trim()
+      !this.editSeatNumber
+        .trim()
       ||
-      !this.editRowLabel.trim()
+      !this.editRowLabel
+        .trim()
       ||
       this.editColumnNumber ===
         null
@@ -734,7 +1415,9 @@ export class AdminSeats
     }
 
 
-    this.isSaving.set(true);
+    this.isSaving.set(
+      true
+    );
 
     this.clearMessages();
 
@@ -758,18 +1441,20 @@ export class AdminSeats
           seatType:
             this.editSeatType
               .trim()
-            || null,
+            ||
+            null,
 
           priceOverride:
             this.editPriceOverride
-
         }
       )
       .pipe(
 
         finalize(() => {
 
-          this.isSaving.set(false);
+          this.isSaving.set(
+            false
+          );
 
         })
 
@@ -805,7 +1490,8 @@ export class AdminSeats
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
           this.errorMessage.set(
@@ -847,14 +1533,17 @@ export class AdminSeats
       );
 
 
-    if (!confirmed) {
+    if (
+      !confirmed
+    ) {
 
       return;
-
     }
 
 
-    this.isSaving.set(true);
+    this.isSaving.set(
+      true
+    );
 
     this.clearMessages();
 
@@ -867,7 +1556,9 @@ export class AdminSeats
 
         finalize(() => {
 
-          this.isSaving.set(false);
+          this.isSaving.set(
+            false
+          );
 
         })
 
@@ -894,7 +1585,8 @@ export class AdminSeats
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
           this.errorMessage.set(
@@ -914,59 +1606,25 @@ export class AdminSeats
      ========================================================= */
 
   getStatusText(
-    status: SeatStatus
+    status:
+      SeatStatus
   ): string {
 
-    switch (status) {
+    switch (
+      status
+    ) {
 
       case SeatStatus.Available:
-
         return 'Available';
 
-
       case SeatStatus.Held:
-
         return 'Held';
 
-
       case SeatStatus.Booked:
-
         return 'Booked';
 
-
       default:
-
         return 'Unknown';
-
-    }
-  }
-
-
-  getStatusClass(
-    status: SeatStatus
-  ): string {
-
-    switch (status) {
-
-      case SeatStatus.Available:
-
-        return 'available';
-
-
-      case SeatStatus.Held:
-
-        return 'held';
-
-
-      case SeatStatus.Booked:
-
-        return 'booked';
-
-
-      default:
-
-        return '';
-
     }
   }
 
@@ -989,10 +1647,11 @@ export class AdminSeats
       this.event();
 
 
-    if (!currentEvent) {
+    if (
+      !currentEvent
+    ) {
 
       return;
-
     }
 
 
@@ -1008,11 +1667,14 @@ export class AdminSeats
 
   private resetCreateForm(): void {
 
-    this.createSeatNumber = '';
+    this.createSeatNumber =
+      '';
 
-    this.createRowLabel = '';
+    this.createRowLabel =
+      '';
 
-    this.createColumnNumber = null;
+    this.createColumnNumber =
+      null;
 
     this.createSeatType =
       'Regular';
@@ -1024,21 +1686,26 @@ export class AdminSeats
 
   private clearMessages(): void {
 
-    this.errorMessage.set('');
+    this.errorMessage.set(
+      ''
+    );
 
-    this.successMessage.set('');
+    this.successMessage.set(
+      ''
+    );
   }
 
 
   private getErrorMessage(
-    error: HttpErrorResponse
+    error:
+      HttpErrorResponse
   ): string {
 
     if (
       error.status === 0
     ) {
 
-      return 'Unable to connect to the VenueFlow server.';
+      return 'Unable to connect to the EventiGo server.';
     }
 
 
@@ -1075,7 +1742,7 @@ export class AdminSeats
       error.status === 409
     ) {
 
-      return 'A seat with the same number or position may already exist.';
+      return 'The requested seat operation conflicts with existing data.';
     }
 
 

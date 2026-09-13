@@ -1,3 +1,9 @@
+export type SeatLayoutType =
+  | 'Theatre'
+  | 'Stadium'
+  | 'Arena'
+  | 'Grid';
+
 export interface Event {
   id: number;
   name: string;
@@ -11,6 +17,8 @@ export interface Event {
   ticketPrice: number;
   parkingFee: number;
   capacity: number;
+
+  seatLayoutType: SeatLayoutType;
 }
 
 export interface EventCreateRequest {

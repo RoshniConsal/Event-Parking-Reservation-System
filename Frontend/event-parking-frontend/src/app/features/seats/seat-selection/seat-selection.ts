@@ -14,7 +14,7 @@ import {
 import {
   ActivatedRoute,
   Router,
-  RouterLink
+
 } from '@angular/router';
 
 import {
@@ -27,7 +27,8 @@ import {
 } from 'rxjs';
 
 import {
-  Event
+  Event,
+  SeatLayoutType
 } from '../../../core/models/event.model';
 
 import {
@@ -56,6 +57,12 @@ interface SeatRow {
   seats: Seat[];
 }
 
+interface PositionedSeat {
+  seat: Seat;
+  x: number;
+  y: number;
+}
+
 
 @Component({
   selector: 'app-seat-selection',
@@ -63,7 +70,7 @@ interface SeatRow {
   imports: [
     DatePipe,
     DecimalPipe,
-    RouterLink
+
   ],
 
   templateUrl:
@@ -109,38 +116,68 @@ export class SeatSelection
     SeatStatus;
 
 
+  /* =========================================================
+     SAVED EVENT LAYOUT
+     ========================================================= */
+
+  readonly layoutType =
+    computed<SeatLayoutType>(() => {
+
+      return (
+        this.event()
+          ?.seatLayoutType
+        ||
+        'Theatre'
+      );
+    });
+
+
+  /* =========================================================
+     GROUP SEATS BY ROW
+     ========================================================= */
+
   readonly seatRows =
     computed<SeatRow[]>(() => {
 
       const groupedSeats =
-        new Map<string, Seat[]>();
+        new Map<
+          string,
+          Seat[]
+        >();
 
 
       for (
-        const seat
-        of this.seats()
+        const seat of
+        this.seats()
       ) {
 
         const rowLabel =
-          seat.rowLabel?.trim()
-          || '-';
+          seat.rowLabel
+            ?.trim()
+          ||
+          '-';
 
 
         if (
-          !groupedSeats.has(rowLabel)
+          !groupedSeats.has(
+            rowLabel
+          )
         ) {
 
           groupedSeats.set(
             rowLabel,
             []
           );
-
         }
 
 
         groupedSeats
-          .get(rowLabel)!
-          .push(seat);
+          .get(
+            rowLabel
+          )!
+          .push(
+            seat
+          );
       }
 
 
@@ -149,13 +186,23 @@ export class SeatSelection
           groupedSeats.entries()
         )
         .map(
-          ([rowLabel, seats]) => ({
+          (
+            [
+              rowLabel,
+              rowSeats
+            ]
+          ) => ({
 
             rowLabel,
 
             seats:
-              [...seats].sort(
-                (first, second) =>
+              [
+                ...rowSeats
+              ].sort(
+                (
+                  first,
+                  second
+                ) =>
                   first.columnNumber
                   -
                   second.columnNumber
@@ -164,18 +211,374 @@ export class SeatSelection
           })
         )
         .sort(
-          (first, second) =>
-            first.rowLabel.localeCompare(
-              second.rowLabel,
-              undefined,
-              {
-                numeric: true
-              }
-            )
+          (
+            first,
+            second
+          ) =>
+            first.rowLabel
+              .localeCompare(
+                second.rowLabel,
+                undefined,
+                {
+                  numeric: true
+                }
+              )
         );
-
     });
 
+
+  /* =========================================================
+     STADIUM POSITIONS
+     ========================================================= */
+
+  readonly stadiumSeatPositions =
+    computed<PositionedSeat[]>(() => {
+
+      const rows =
+        this.seatRows();
+
+      const positions:
+        PositionedSeat[] = [];
+
+
+      if (
+        rows.length === 0
+      ) {
+
+        return positions;
+      }
+
+
+      const splitIndex =
+        Math.ceil(
+          rows.length / 2
+        );
+
+
+      const topRows =
+        rows.slice(
+          0,
+          splitIndex
+        );
+
+
+      const bottomRows =
+        rows.slice(
+          splitIndex
+        );
+
+
+      /*
+        TOP STANDS
+      */
+
+      topRows.forEach(
+        (
+          row,
+          rowIndex
+        ) => {
+
+          const rowProgress =
+            topRows.length <= 1
+              ? 0
+              : rowIndex /
+                (
+                  topRows.length
+                  -
+                  1
+                );
+
+
+          const radiusX =
+            46
+            -
+            rowProgress * 11;
+
+
+          const radiusY =
+            42
+            -
+            rowProgress * 17;
+
+
+          row.seats.forEach(
+            (
+              seat,
+              seatIndex
+            ) => {
+
+              const progress =
+                row.seats.length <= 1
+                  ? 0.5
+                  : seatIndex /
+                    (
+                      row.seats.length
+                      -
+                      1
+                    );
+
+
+              const angle =
+                202
+                +
+                progress * 136;
+
+
+              const radians =
+                angle
+                *
+                Math.PI
+                /
+                180;
+
+
+              positions.push({
+
+                seat,
+
+                x:
+                  50
+                  +
+                  radiusX
+                  *
+                  Math.cos(
+                    radians
+                  ),
+
+                y:
+                  50
+                  +
+                  radiusY
+                  *
+                  Math.sin(
+                    radians
+                  )
+              });
+            }
+          );
+        }
+      );
+
+
+      /*
+        BOTTOM STANDS
+      */
+
+      bottomRows.forEach(
+        (
+          row,
+          rowIndex
+        ) => {
+
+          const rowProgress =
+            bottomRows.length <= 1
+              ? 0
+              : rowIndex /
+                (
+                  bottomRows.length
+                  -
+                  1
+                );
+
+
+          const radiusX =
+            35
+            +
+            rowProgress * 11;
+
+
+          const radiusY =
+            25
+            +
+            rowProgress * 17;
+
+
+          row.seats.forEach(
+            (
+              seat,
+              seatIndex
+            ) => {
+
+              const progress =
+                row.seats.length <= 1
+                  ? 0.5
+                  : seatIndex /
+                    (
+                      row.seats.length
+                      -
+                      1
+                    );
+
+
+              const angle =
+                22
+                +
+                progress * 136;
+
+
+              const radians =
+                angle
+                *
+                Math.PI
+                /
+                180;
+
+
+              positions.push({
+
+                seat,
+
+                x:
+                  50
+                  +
+                  radiusX
+                  *
+                  Math.cos(
+                    radians
+                  ),
+
+                y:
+                  50
+                  +
+                  radiusY
+                  *
+                  Math.sin(
+                    radians
+                  )
+              });
+            }
+          );
+        }
+      );
+
+
+      return positions;
+    });
+
+
+  /* =========================================================
+     ARENA POSITIONS
+     ========================================================= */
+
+  readonly arenaSeatPositions =
+    computed<PositionedSeat[]>(() => {
+
+      const rows =
+        this.seatRows();
+
+      const positions:
+        PositionedSeat[] = [];
+
+
+      if (
+        rows.length === 0
+      ) {
+
+        return positions;
+      }
+
+
+      rows.forEach(
+        (
+          row,
+          rowIndex
+        ) => {
+
+          const progress =
+            rows.length <= 1
+              ? 0
+              : rowIndex /
+                (
+                  rows.length
+                  -
+                  1
+                );
+
+
+          /*
+            A = inner ring
+            Last row = outer ring
+          */
+
+          const radiusX =
+            15
+            +
+            progress * 31;
+
+
+          const radiusY =
+            15
+            +
+            progress * 31;
+
+
+          row.seats.forEach(
+            (
+              seat,
+              seatIndex
+            ) => {
+
+              const count =
+                Math.max(
+                  row.seats.length,
+                  1
+                );
+
+
+              const angle =
+                -90
+                +
+                (
+                  360 /
+                  count
+                )
+                *
+                seatIndex;
+
+
+              const radians =
+                angle
+                *
+                Math.PI
+                /
+                180;
+
+
+              positions.push({
+
+                seat,
+
+                x:
+                  50
+                  +
+                  radiusX
+                  *
+                  Math.cos(
+                    radians
+                  ),
+
+                y:
+                  50
+                  +
+                  radiusY
+                  *
+                  Math.sin(
+                    radians
+                  )
+              });
+            }
+          );
+        }
+      );
+
+
+      return positions;
+    });
+
+
+  /* =========================================================
+     COUNTS
+     ========================================================= */
 
   readonly availableSeatCount =
     computed(() =>
@@ -187,29 +590,42 @@ export class SeatSelection
             SeatStatus.Available
         )
         .length
-
     );
 
+
+  /* =========================================================
+     INIT
+     ========================================================= */
 
   ngOnInit(): void {
 
     const eventIdValue =
       this.route.snapshot
         .paramMap
-        .get('eventId');
+        .get(
+          'eventId'
+        );
 
 
     const eventId =
-      Number(eventIdValue);
+      Number(
+        eventIdValue
+      );
 
 
     if (
-      !eventIdValue ||
-      Number.isNaN(eventId) ||
+      !eventIdValue
+      ||
+      Number.isNaN(
+        eventId
+      )
+      ||
       eventId <= 0
     ) {
 
-      this.isLoading.set(false);
+      this.isLoading.set(
+        false
+      );
 
       this.errorMessage.set(
         'Invalid event.'
@@ -225,20 +641,30 @@ export class SeatSelection
   }
 
 
+  /* =========================================================
+     LOAD
+     ========================================================= */
+
   loadSeatSelection(
     eventId: number
   ): void {
 
-    this.isLoading.set(true);
+    this.isLoading.set(
+      true
+    );
 
-    this.errorMessage.set('');
+    this.errorMessage.set(
+      ''
+    );
 
 
     forkJoin({
 
       event:
         this.eventService
-          .getById(eventId),
+          .getById(
+            eventId
+          ),
 
       seats:
         this.seatService
@@ -252,7 +678,9 @@ export class SeatSelection
 
         finalize(() => {
 
-          this.isLoading.set(false);
+          this.isLoading.set(
+            false
+          );
 
         })
 
@@ -285,12 +713,18 @@ export class SeatSelection
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
-          this.event.set(null);
+          this.event.set(
+            null
+          );
 
-          this.seats.set([]);
+          this.seats.set(
+            []
+          );
+
 
           this.errorMessage.set(
             this.getErrorMessage(
@@ -303,6 +737,10 @@ export class SeatSelection
       });
   }
 
+
+  /* =========================================================
+     SELECT SEAT
+     ========================================================= */
 
   toggleSeat(
     seat: Seat
@@ -318,7 +756,9 @@ export class SeatSelection
 
 
     this.bookingFlow
-      .toggleSeat(seat);
+      .toggleSeat(
+        seat
+      );
   }
 
 
@@ -333,6 +773,10 @@ export class SeatSelection
   }
 
 
+  /* =========================================================
+     PRICE
+     ========================================================= */
+
   getSeatPrice(
     seat: Seat
   ): number {
@@ -341,10 +785,11 @@ export class SeatSelection
       this.event();
 
 
-    if (!currentEvent) {
+    if (
+      !currentEvent
+    ) {
 
       return 0;
-
     }
 
 
@@ -355,6 +800,10 @@ export class SeatSelection
     );
   }
 
+
+  /* =========================================================
+     STATUS
+     ========================================================= */
 
   getSeatStatusText(
     seat: Seat
@@ -386,6 +835,10 @@ export class SeatSelection
   }
 
 
+  /* =========================================================
+     CONTINUE
+     ========================================================= */
+
   continueToParking(): void {
 
     const currentEvent =
@@ -393,7 +846,8 @@ export class SeatSelection
 
 
     if (
-      !currentEvent ||
+      !currentEvent
+      ||
       !this.bookingFlow
         .hasSelectedSeats()
     ) {
@@ -410,13 +864,19 @@ export class SeatSelection
   }
 
 
+  /* =========================================================
+     BACK
+     ========================================================= */
+
   backToEvent(): void {
 
     const currentEvent =
       this.event();
 
 
-    if (!currentEvent) {
+    if (
+      !currentEvent
+    ) {
 
       this.router.navigate([
         '/events'
@@ -433,13 +893,19 @@ export class SeatSelection
   }
 
 
+  /* =========================================================
+     REFRESH
+     ========================================================= */
+
   refreshSeats(): void {
 
     const currentEvent =
       this.event();
 
 
-    if (!currentEvent) {
+    if (
+      !currentEvent
+    ) {
 
       return;
     }
@@ -451,8 +917,13 @@ export class SeatSelection
   }
 
 
+  /* =========================================================
+     SYNC SELECTED
+     ========================================================= */
+
   private syncSelectedSeats(
-    latestSeats: Seat[]
+    latestSeats:
+      Seat[]
   ): void {
 
     const oldSelectedIds =
@@ -487,26 +958,32 @@ export class SeatSelection
 
 
     for (
-      const seat
-      of validSelectedSeats
+      const seat of
+      validSelectedSeats
     ) {
 
       this.bookingFlow
-        .toggleSeat(seat);
-
+        .toggleSeat(
+          seat
+        );
     }
   }
 
 
+  /* =========================================================
+     ERROR
+     ========================================================= */
+
   private getErrorMessage(
-    error: HttpErrorResponse
+    error:
+      HttpErrorResponse
   ): string {
 
     if (
       error.status === 0
     ) {
 
-      return 'Unable to connect to the VenueFlow server. Please make sure the backend API is running.';
+      return 'Unable to connect to the EventiGo server. Please make sure the backend API is running.';
     }
 
 
