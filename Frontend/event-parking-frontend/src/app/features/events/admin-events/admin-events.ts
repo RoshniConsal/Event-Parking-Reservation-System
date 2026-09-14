@@ -93,34 +93,26 @@ export class AdminEvents
   readonly events =
     signal<Event[]>([]);
 
-
   readonly venues =
     signal<Venue[]>([]);
-
 
   readonly categories =
     signal<Category[]>([]);
 
-
   readonly isLoading =
     signal(true);
-
 
   readonly isSaving =
     signal(false);
 
-
   readonly deletingId =
     signal<number | null>(null);
-
 
   readonly editingEventId =
     signal<number | null>(null);
 
-
   readonly errorMessage =
     signal('');
-
 
   readonly successMessage =
     signal('');
@@ -204,7 +196,6 @@ export class AdminEvents
   ngOnInit(): void {
 
     this.loadPageData();
-
   }
 
 
@@ -228,13 +219,9 @@ export class AdminEvents
 
     })
       .pipe(
-
         finalize(() => {
-
           this.isLoading.set(false);
-
         })
-
       )
       .subscribe({
 
@@ -272,7 +259,6 @@ export class AdminEvents
                 )
             )
           );
-
         },
 
 
@@ -286,11 +272,9 @@ export class AdminEvents
               'Unable to load event management data.'
             )
           );
-
         }
 
       });
-
   }
 
 
@@ -347,18 +331,18 @@ export class AdminEvents
       top: 0,
       behavior: 'smooth'
     });
-
   }
 
 
   cancelEdit(): void {
 
-    this.editingEventId.set(null);
+    this.editingEventId.set(
+      null
+    );
 
     this.resetForm();
 
     this.errorMessage.set('');
-
   }
 
 
@@ -371,7 +355,6 @@ export class AdminEvents
       event.id,
       'seats'
     ]);
-
   }
 
 
@@ -386,15 +369,16 @@ export class AdminEvents
       this.eventForm.invalid
     ) {
 
-      this.eventForm.markAllAsTouched();
+      this.eventForm
+        .markAllAsTouched();
 
       return;
-
     }
 
 
     const formValue =
-      this.eventForm.getRawValue();
+      this.eventForm
+        .getRawValue();
 
 
     const name =
@@ -412,7 +396,6 @@ export class AdminEvents
       );
 
       return;
-
     }
 
 
@@ -443,7 +426,6 @@ export class AdminEvents
       );
 
       return;
-
     }
 
 
@@ -456,7 +438,6 @@ export class AdminEvents
       );
 
       return;
-
     }
 
 
@@ -482,7 +463,6 @@ export class AdminEvents
       );
 
       return;
-
     }
 
 
@@ -553,38 +533,60 @@ export class AdminEvents
 
     operation$
       .pipe(
-
         finalize(() => {
-
           this.isSaving.set(false);
-
         })
-
       )
       .subscribe({
 
-        next: () => {
+        next: savedEvent => {
+
+          /*
+            NEW EVENT
+            Event -> Seat Management
+          */
+
+          if (
+            editingId === null
+          ) {
+
+            this.successMessage.set(
+              'Event created successfully. Opening Seat Management...'
+            );
+
+            this.resetForm();
+
+
+            setTimeout(() => {
+
+              this.router.navigate([
+                '/admin/events',
+                savedEvent.id,
+                'seats'
+              ]);
+
+            }, 500);
+
+            return;
+          }
+
+
+          /*
+            EDIT EVENT
+            Stay on Events page
+          */
 
           this.successMessage.set(
-
-            editingId === null
-
-              ? 'Event created successfully.'
-
-              : 'Event updated successfully.'
-
+            'Event updated successfully.'
           );
-
 
           this.editingEventId.set(
             null
           );
 
-
           this.resetForm();
 
           this.loadPageData();
-
         },
 
 
@@ -597,17 +599,13 @@ export class AdminEvents
               error,
 
               editingId === null
-
                 ? 'Unable to create event.'
-
                 : 'Unable to update event.'
             )
           );
-
         }
 
       });
-
   }
 
 
@@ -622,9 +620,7 @@ export class AdminEvents
 
 
     if (!confirmed) {
-
       return;
-
     }
 
 
@@ -642,13 +638,9 @@ export class AdminEvents
         event.id
       )
       .pipe(
-
         finalize(() => {
-
           this.deletingId.set(null);
-
         })
-
       )
       .subscribe({
 
@@ -665,12 +657,10 @@ export class AdminEvents
           ) {
 
             this.cancelEdit();
-
           }
 
 
           this.loadPageData();
-
         },
 
 
@@ -684,11 +674,9 @@ export class AdminEvents
               'Unable to delete event.'
             )
           );
-
         }
 
       });
-
   }
 
 
@@ -697,25 +685,16 @@ export class AdminEvents
     this.eventForm.reset({
 
       name: '',
-
       description: '',
-
       venueId: 0,
-
       categoryId: 0,
-
       startDateTime: '',
-
       endDateTime: '',
-
       ticketPrice: 0,
-
       parkingFee: 0,
-
       capacity: 1
 
     });
-
   }
 
 
@@ -724,9 +703,7 @@ export class AdminEvents
   ): string {
 
     if (!value) {
-
       return '';
-
     }
 
 
@@ -738,7 +715,6 @@ export class AdminEvents
         )
 
       : value;
-
   }
 
 
@@ -752,7 +728,6 @@ export class AdminEvents
     ) {
 
       return 'Unable to connect to the VenueFlow server. Please make sure the backend API is running.';
-
     }
 
 
@@ -761,7 +736,6 @@ export class AdminEvents
     ) {
 
       return 'Your login session has expired. Please sign in again.';
-
     }
 
 
@@ -770,7 +744,6 @@ export class AdminEvents
     ) {
 
       return 'You are not allowed to manage events.';
-
     }
 
 
@@ -783,7 +756,6 @@ export class AdminEvents
         ||
         'This event conflicts with existing event data.'
       );
-
     }
 
 
@@ -797,7 +769,6 @@ export class AdminEvents
     ) {
 
       return backendMessage;
-
     }
 
 
@@ -829,14 +800,11 @@ export class AdminEvents
       ) {
 
         return firstError;
-
       }
-
     }
 
 
     return fallback;
-
   }
 
 }

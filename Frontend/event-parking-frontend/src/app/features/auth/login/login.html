@@ -1,308 +1,715 @@
-<section class="auth-page">
+<section
+  class="auth-page"
+  [class.admin-mode]="isAdminLogin"
+>
 
-  <div class="auth-glow auth-glow-one"></div>
-  <div class="auth-glow auth-glow-two"></div>
+  <!-- DECORATIVE BACKGROUND -->
+  <div class="background-grid"></div>
 
-  <div class="container auth-grid">
+  <div class="glow glow-one"></div>
+  <div class="glow glow-two"></div>
+  <div class="glow glow-three"></div>
 
-    <!-- LEFT SIDE -->
+  <div class="container auth-container">
 
-    <div class="auth-intro">
+    <!-- ==========================================
+         LEFT SIDE
+         ========================================== -->
+
+    <section class="auth-visual">
 
       <a
         routerLink="/"
-        class="auth-brand"
+        class="brand"
       >
-        <img
-          src="/branding/venueflow-logo.png"
-          alt="VenueFlow logo"
-        />
 
-        <div>
-          <strong>VenueFlow</strong>
+        <div class="brand-logo-wrap">
+
+          <img
+            src="/branding/venueflow-logo.png"
+            alt="VenueFlow logo"
+          />
+
+        </div>
+
+        <div class="brand-copy">
+
+          <strong>
+            VenueFlow
+          </strong>
 
           <span>
-            Events. Seats. Parking. Simplified.
+            EVENTS. SEATS. PARKING. SIMPLIFIED.
           </span>
+
         </div>
+
       </a>
 
 
-      <div class="intro-content">
+      <div class="visual-content">
 
-        <span class="intro-label">
-          WELCOME BACK
-        </span>
+        <div class="portal-eyebrow">
 
-        <h1>
-          Your complete event experience,
-          <span>all in one place.</span>
-        </h1>
+          <span class="eyebrow-dot"></span>
 
-        <p>
-          Sign in to manage your bookings,
-          seats, parking, payments and
-          notifications.
-        </p>
+          @if (isAdminLogin) {
+            VENUEFLOW ADMINISTRATION
+          } @else {
+            YOUR EVENT EXPERIENCE
+          }
+
+        </div>
+
+
+        @if (isAdminLogin) {
+
+          <h1>
+            Control every
+            <span>
+              event experience
+            </span>
+            from one place.
+          </h1>
+
+          <p class="hero-description">
+            Manage events, customers, bookings,
+            payments, seats and parking through
+            one secure VenueFlow administration
+            experience.
+          </p>
+
+        } @else {
+
+          <h1>
+            Your next
+            <span>
+              unforgettable event
+            </span>
+            starts here.
+          </h1>
+
+          <p class="hero-description">
+            Sign in to discover events,
+            reserve your seat, secure parking
+            and manage every part of your
+            VenueFlow journey.
+          </p>
+
+        }
+
+
+        <!-- GLASS EXPERIENCE CARD -->
+
+        <div class="experience-glass">
+
+          <div class="experience-header">
+
+            <div>
+
+              <small>
+                @if (isAdminLogin) {
+                  MANAGEMENT CONSOLE
+                } @else {
+                  EVENT EXPERIENCE
+                }
+              </small>
+
+              <strong>
+                @if (isAdminLogin) {
+                  Everything. One dashboard.
+                } @else {
+                  Everything. One reservation.
+                }
+              </strong>
+
+            </div>
+
+            <div class="experience-shine">
+              ✦
+            </div>
+
+          </div>
+
+
+          <div class="experience-items">
+
+            @if (isAdminLogin) {
+
+              <div class="experience-item">
+
+                <div class="experience-icon">
+                  E
+                </div>
+
+                <div>
+                  <strong>
+                    Event Management
+                  </strong>
+
+                  <span>
+                    Venues, categories and events
+                  </span>
+                </div>
+
+                <div class="experience-check">
+                  ✓
+                </div>
+
+              </div>
+
+
+              <div class="experience-item">
+
+                <div class="experience-icon">
+                  B
+                </div>
+
+                <div>
+                  <strong>
+                    Booking Control
+                  </strong>
+
+                  <span>
+                    Monitor reservations
+                  </span>
+                </div>
+
+                <div class="experience-check">
+                  ✓
+                </div>
+
+              </div>
+
+
+              <div class="experience-item">
+
+                <div class="experience-icon">
+                  P
+                </div>
+
+                <div>
+                  <strong>
+                    Payment Insights
+                  </strong>
+
+                  <span>
+                    Track transaction activity
+                  </span>
+                </div>
+
+                <div class="experience-check">
+                  ✓
+                </div>
+
+              </div>
+
+            } @else {
+
+              <div class="experience-item">
+
+                <div class="experience-icon">
+                  T
+                </div>
+
+                <div>
+                  <strong>
+                    Event Ticket
+                  </strong>
+
+                  <span>
+                    Quick online reservation
+                  </span>
+                </div>
+
+                <div class="experience-check">
+                  ✓
+                </div>
+
+              </div>
+
+
+              <div class="experience-item">
+
+                <div class="experience-icon">
+                  S
+                </div>
+
+                <div>
+                  <strong>
+                    Seat Selection
+                  </strong>
+
+                  <span>
+                    Choose your perfect spot
+                  </span>
+                </div>
+
+                <div class="experience-check">
+                  ✓
+                </div>
+
+              </div>
+
+
+              <div class="experience-item">
+
+                <div class="experience-icon">
+                  P
+                </div>
+
+                <div>
+                  <strong>
+                    Parking Space
+                  </strong>
+
+                  <span>
+                    Reserve before arrival
+                  </span>
+                </div>
+
+                <div class="experience-check">
+                  ✓
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+
+          <div class="experience-footer">
+
+            <div>
+
+              <span>
+                Secure access
+              </span>
+
+              <strong>
+                Ready when you are
+              </strong>
+
+            </div>
+
+            <div class="footer-arrow">
+              →
+            </div>
+
+          </div>
+
+        </div>
 
       </div>
 
 
-      <div class="intro-features">
+      <div class="visual-footer">
 
-        <div class="intro-feature">
-          <span>✓</span>
+        <span class="security-dot"></span>
 
-          <div>
-            <strong>Fast reservations</strong>
-            <small>
-              Book your experience in minutes
-            </small>
-          </div>
-        </div>
-
-        <div class="intro-feature">
-          <span>✓</span>
-
-          <div>
-            <strong>Smart parking</strong>
-            <small>
-              Reserve before you arrive
-            </small>
-          </div>
-        </div>
-
-        <div class="intro-feature">
-          <span>✓</span>
-
-          <div>
-            <strong>Everything connected</strong>
-            <small>
-              One account for the full journey
-            </small>
-          </div>
-        </div>
+        Secure role-based authentication
 
       </div>
 
-    </div>
+    </section>
 
 
-    <!-- RIGHT SIDE -->
+    <!-- ==========================================
+         RIGHT SIDE LOGIN
+         ========================================== -->
 
-    <div class="login-card glass-panel">
+    <section class="login-column">
 
-      <div class="login-header">
+      <div class="login-glass">
 
-        <span class="login-label">
-          SECURE SIGN IN
-        </span>
+        <!-- PORTAL SWITCH -->
 
-        <h2>Welcome back</h2>
+        <div class="portal-switch">
 
-        <p>
-          Enter your VenueFlow account details.
-        </p>
+          <a
+            routerLink="/customer-login"
+            class="portal-option"
+            [class.active]="!isAdminLogin"
+          >
 
-      </div>
+            <span class="portal-icon">
+              C
+            </span>
+
+            <span class="portal-text">
+
+              <small>
+                USER PORTAL
+              </small>
+
+              <strong>
+                Customer
+              </strong>
+
+            </span>
+
+          </a>
 
 
-      @if (errorMessage()) {
+          <a
+            routerLink="/admin-login"
+            class="portal-option"
+            [class.active]="isAdminLogin"
+          >
 
-        <div class="login-error">
-          <span>!</span>
+            <span class="portal-icon">
+              A
+            </span>
+
+            <span class="portal-text">
+
+              <small>
+                MANAGEMENT
+              </small>
+
+              <strong>
+                Admin
+              </strong>
+
+            </span>
+
+          </a>
+
+        </div>
+
+
+        <!-- LOGIN HEADING -->
+
+        <div class="login-heading">
+
+          <div class="login-badge">
+
+            <span></span>
+
+            @if (isAdminLogin) {
+              ADMIN PORTAL
+            } @else {
+              CUSTOMER PORTAL
+            }
+
+          </div>
+
+
+          <h2>
+
+            @if (isAdminLogin) {
+              Admin Sign In
+            } @else {
+              Welcome back
+            }
+
+          </h2>
+
 
           <p>
-            {{ errorMessage() }}
+
+            @if (isAdminLogin) {
+
+              Sign in with your administrator
+              credentials to continue.
+
+            } @else {
+
+              Enter your VenueFlow account details
+              to continue your experience.
+
+            }
+
           </p>
-        </div>
-
-      }
-
-
-      <form
-        [formGroup]="loginForm"
-        (ngSubmit)="submit()"
-        novalidate
-      >
-
-        <!-- EMAIL -->
-
-        <div class="form-group">
-
-          <label
-            for="email"
-            class="form-label"
-          >
-            Email address
-          </label>
-
-          <input
-            id="email"
-            type="email"
-            formControlName="email"
-            class="form-control"
-            placeholder="you@example.com"
-            autocomplete="email"
-          />
-
-          @if (
-            loginForm.controls.email.touched &&
-            loginForm.controls.email.hasError('required')
-          ) {
-
-            <span class="form-error">
-              Email address is required.
-            </span>
-
-          }
-
-          @if (
-            loginForm.controls.email.touched &&
-            loginForm.controls.email.hasError('email')
-          ) {
-
-            <span class="form-error">
-              Enter a valid email address.
-            </span>
-
-          }
 
         </div>
 
 
-        <!-- PASSWORD -->
+        <!-- ERROR -->
 
-        <div class="form-group">
+        @if (errorMessage()) {
 
-          <div class="password-label-row">
+          <div class="login-error">
+
+            <div class="error-icon">
+              !
+            </div>
+
+            <p>
+              {{ errorMessage() }}
+            </p>
+
+          </div>
+
+        }
+
+
+        <!-- FORM -->
+
+        <form
+          [formGroup]="loginForm"
+          (ngSubmit)="submit()"
+          novalidate
+        >
+
+          <!-- EMAIL -->
+
+          <div class="form-group">
 
             <label
-              for="password"
+              for="email"
               class="form-label"
             >
-              Password
+              Email address
             </label>
 
-            <a
-              routerLink="/forgot-password"
-              class="forgot-link"
-            >
-              Forgot password?
+
+            <div class="input-shell">
+
+              <span class="input-icon">
+                @
+              </span>
+
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                class="form-control"
+                placeholder="you@example.com"
+                autocomplete="email"
+              />
+
+            </div>
+
+
+            @if (
+              loginForm.controls.email.touched &&
+              loginForm.controls.email.hasError(
+                'required'
+              )
+            ) {
+
+              <span class="form-error">
+                Email address is required.
+              </span>
+
+            }
+
+
+            @if (
+              loginForm.controls.email.touched &&
+              loginForm.controls.email.hasError(
+                'email'
+              )
+            ) {
+
+              <span class="form-error">
+                Enter a valid email address.
+              </span>
+
+            }
+
+          </div>
+
+
+          <!-- PASSWORD -->
+
+          <div class="form-group">
+
+            <div class="password-label-row">
+
+              <label
+                for="password"
+                class="form-label"
+              >
+                Password
+              </label>
+
+
+              <a
+                routerLink="/forgot-password"
+                class="forgot-link"
+              >
+                Forgot password?
+              </a>
+
+            </div>
+
+
+            <div class="input-shell password-shell">
+
+              <span class="input-icon">
+                ◆
+              </span>
+
+              <input
+                id="password"
+                [type]="
+                  showPassword()
+                    ? 'text'
+                    : 'password'
+                "
+                formControlName="password"
+                class="form-control"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+              />
+
+
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePassword()"
+                [attr.aria-label]="
+                  showPassword()
+                    ? 'Hide password'
+                    : 'Show password'
+                "
+              >
+
+                {{
+                  showPassword()
+                    ? 'Hide'
+                    : 'Show'
+                }}
+
+              </button>
+
+            </div>
+
+
+            @if (
+              loginForm.controls.password.touched &&
+              loginForm.controls.password.hasError(
+                'required'
+              )
+            ) {
+
+              <span class="form-error">
+                Password is required.
+              </span>
+
+            }
+
+
+            @if (
+              loginForm.controls.password.touched &&
+              loginForm.controls.password.hasError(
+                'minlength'
+              )
+            ) {
+
+              <span class="form-error">
+                Password must contain at least
+                6 characters.
+              </span>
+
+            }
+
+          </div>
+
+
+          <!-- LOGIN BUTTON -->
+
+          <button
+            type="submit"
+            class="login-submit"
+            [class.admin-submit]="isAdminLogin"
+            [disabled]="isSubmitting()"
+          >
+
+            @if (isSubmitting()) {
+
+              <span class="button-spinner"></span>
+
+              Signing in...
+
+            } @else {
+
+              <span>
+
+                @if (isAdminLogin) {
+                  Enter Admin Dashboard
+                } @else {
+                  Continue to VenueFlow
+                }
+
+              </span>
+
+              <span class="submit-arrow">
+                →
+              </span>
+
+            }
+
+          </button>
+
+        </form>
+
+
+        <!-- BOTTOM -->
+
+        <div class="login-divider">
+
+          <span></span>
+
+          <small>
+            SECURE ACCESS
+          </small>
+
+          <span></span>
+
+        </div>
+
+
+        @if (!isAdminLogin) {
+
+          <div class="account-section">
+
+            <span>
+              New to VenueFlow?
+            </span>
+
+            <a routerLink="/register">
+              Create an account
             </a>
 
           </div>
 
-          <div class="password-control">
+        } @else {
 
-            <input
-              id="password"
-              [type]="
-                showPassword()
-                  ? 'text'
-                  : 'password'
-              "
-              formControlName="password"
-              class="form-control"
-              placeholder="Enter your password"
-              autocomplete="current-password"
-            />
+          <div class="account-section">
 
-            <button
-              type="button"
-              class="password-toggle"
-              (click)="togglePassword()"
-              [attr.aria-label]="
-                showPassword()
-                  ? 'Hide password'
-                  : 'Show password'
-              "
-            >
-              {{
-                showPassword()
-                  ? 'Hide'
-                  : 'Show'
-              }}
-            </button>
+            <span>
+              Looking for events?
+            </span>
+
+            <a routerLink="/customer-login">
+              Customer Login
+            </a>
 
           </div>
 
-          @if (
-            loginForm.controls.password.touched &&
-            loginForm.controls.password.hasError('required')
-          ) {
+        }
 
-            <span class="form-error">
-              Password is required.
-            </span>
 
-          }
+        <div class="secure-note">
 
-          @if (
-            loginForm.controls.password.touched &&
-            loginForm.controls.password.hasError('minlength')
-          ) {
+          <div class="secure-icon">
+            ✓
+          </div>
 
-            <span class="form-error">
-              Password must contain at least
-              6 characters.
-            </span>
-
-          }
+          <p>
+            Protected by secure authentication
+            and role-based access.
+          </p>
 
         </div>
 
-
-        <!-- SUBMIT -->
-
-        <button
-          type="submit"
-          class="btn btn-primary login-submit"
-          [disabled]="isSubmitting()"
-        >
-
-          @if (isSubmitting()) {
-
-            <span class="button-spinner"></span>
-            Signing in...
-
-          } @else {
-
-            Sign In
-            <span>→</span>
-
-          }
-
-        </button>
-
-      </form>
-
-
-      <div class="register-section">
-
-        <span>
-          New to VenueFlow?
-        </span>
-
-        <a routerLink="/register">
-          Create an account
-        </a>
-
       </div>
 
-
-      <div class="secure-note">
-
-        <span>◆</span>
-
-        <p>
-          Your account is protected using
-          secure authentication.
-        </p>
-
-      </div>
-
-    </div>
+    </section>
 
   </div>
 

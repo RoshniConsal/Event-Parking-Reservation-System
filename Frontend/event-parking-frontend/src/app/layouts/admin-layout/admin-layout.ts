@@ -1,21 +1,43 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {
+  Component,
+  inject
+} from '@angular/core';
+
+import {
+  Router,
+  RouterOutlet
+} from '@angular/router';
 
 import {
   Navbar,
   NavbarItem
 } from '../../shared/components/navbar/navbar';
 
+import {
+  AuthService
+} from '../../core/services/auth';
+
 @Component({
   selector: 'app-admin-layout',
+
   imports: [
     RouterOutlet,
     Navbar
   ],
-  templateUrl: './admin-layout.html',
-  styleUrl: './admin-layout.css'
+
+  templateUrl:
+    './admin-layout.html',
+
+  styleUrl:
+    './admin-layout.css'
 })
 export class AdminLayout {
+
+  private readonly router =
+    inject(Router);
+
+  private readonly authService =
+    inject(AuthService);
 
   readonly navItems: NavbarItem[] = [
     {
@@ -51,4 +73,13 @@ export class AdminLayout {
       route: '/admin/notifications'
     }
   ];
+
+  logout(): void {
+
+    this.authService.logout();
+
+    this.router.navigate([
+      '/admin-login'
+    ]);
+  }
 }

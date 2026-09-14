@@ -103,6 +103,9 @@ export class AdminParking
   readonly showCreateForm =
     signal(false);
 
+  readonly showGenerateForm =
+    signal(false);
+
   readonly editingSlotId =
     signal<number | null>(null);
 
@@ -111,9 +114,9 @@ export class AdminParking
     ParkingSlotStatus;
 
 
-  /* =========================================================
-     CREATE FORM
-     ========================================================= */
+  /* =====================================================
+     CREATE SINGLE SLOT
+     ===================================================== */
 
   createSlotNumber = '';
 
@@ -123,9 +126,29 @@ export class AdminParking
     number | null = null;
 
 
-  /* =========================================================
-     EDIT FORM
-     ========================================================= */
+  /* =====================================================
+     GENERATE MULTIPLE SLOTS
+     ===================================================== */
+
+  generateNumberOfSlots =
+    100;
+
+  generatePrefix =
+    'P';
+
+  generateStartNumber =
+    1;
+
+  generateZone =
+    'A';
+
+  generateFee:
+    number | null = null;
+
+
+  /* =====================================================
+     EDIT
+     ===================================================== */
 
   editSlotNumber = '';
 
@@ -139,9 +162,9 @@ export class AdminParking
       ParkingSlotStatus.Available;
 
 
-  /* =========================================================
+  /* =====================================================
      COUNTS
-     ========================================================= */
+     ===================================================== */
 
   readonly totalCount =
     computed(() =>
@@ -159,7 +182,6 @@ export class AdminParking
             ParkingSlotStatus.Available
         )
         .length
-
     );
 
 
@@ -173,7 +195,6 @@ export class AdminParking
             ParkingSlotStatus.Held
         )
         .length
-
     );
 
 
@@ -187,7 +208,6 @@ export class AdminParking
             ParkingSlotStatus.Booked
         )
         .length
-
     );
 
 
@@ -201,7 +221,6 @@ export class AdminParking
             ParkingSlotStatus.Unavailable
         )
         .length
-
     );
 
 
@@ -231,7 +250,6 @@ export class AdminParking
           ) {
 
             return zoneCompare;
-
           }
 
 
@@ -243,23 +261,23 @@ export class AdminParking
                 numeric: true
               }
             );
-
         }
       );
-
     });
 
 
-  /* =========================================================
+  /* =====================================================
      INIT
-     ========================================================= */
+     ===================================================== */
 
   ngOnInit(): void {
 
     const eventIdValue =
       this.route.snapshot
         .paramMap
-        .get('eventId');
+        .get(
+          'eventId'
+        );
 
 
     const eventId =
@@ -269,12 +287,18 @@ export class AdminParking
 
 
     if (
-      !eventIdValue ||
-      Number.isNaN(eventId) ||
+      !eventIdValue
+      ||
+      Number.isNaN(
+        eventId
+      )
+      ||
       eventId <= 0
     ) {
 
-      this.isLoading.set(false);
+      this.isLoading.set(
+        false
+      );
 
       this.errorMessage.set(
         'Invalid event.'
@@ -290,24 +314,30 @@ export class AdminParking
   }
 
 
-  /* =========================================================
-     LOAD EVENT + PARKING
-     ========================================================= */
+  /* =====================================================
+     LOAD
+     ===================================================== */
 
   loadData(
     eventId: number
   ): void {
 
-    this.isLoading.set(true);
+    this.isLoading.set(
+      true
+    );
 
-    this.errorMessage.set('');
+    this.errorMessage.set(
+      ''
+    );
 
 
     forkJoin({
 
       event:
         this.eventService
-          .getById(eventId),
+          .getById(
+            eventId
+          ),
 
       parkingSlots:
         this.parkingService
@@ -321,7 +351,9 @@ export class AdminParking
 
         finalize(() => {
 
-          this.isLoading.set(false);
+          this.isLoading.set(
+            false
+          );
 
         })
 
@@ -334,20 +366,36 @@ export class AdminParking
             response.event
           );
 
+
           this.parkingSlots.set(
             response.parkingSlots
           );
+
+
+          /*
+           * Event parking fee becomes
+           * default fee.
+           */
+
+          this.generateFee =
+            response.event
+              .parkingFee;
 
         },
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
-          this.event.set(null);
+          this.event.set(
+            null
+          );
 
-          this.parkingSlots.set([]);
+          this.parkingSlots.set(
+            []
+          );
 
           this.errorMessage.set(
             this.getErrorMessage(
@@ -361,17 +409,27 @@ export class AdminParking
   }
 
 
-  /* =========================================================
-     CREATE FORM
-     ========================================================= */
+  /* =====================================================
+     OPEN SINGLE CREATE
+     ===================================================== */
 
   openCreateForm(): void {
+
+    this.showGenerateForm.set(
+      false
+    );
 
     this.editingSlotId.set(
       null
     );
 
     this.resetCreateForm();
+
+    this.createFee =
+      this.event()
+        ?.parkingFee
+      ??
+      null;
 
     this.showCreateForm.set(
       true
@@ -389,9 +447,59 @@ export class AdminParking
   }
 
 
-  /* =========================================================
-     CREATE SLOT
-     ========================================================= */
+  /* =====================================================
+     OPEN GENERATOR
+     ===================================================== */
+
+  openGenerateForm(): void {
+
+    this.showCreateForm.set(
+      false
+    );
+
+    this.editingSlotId.set(
+      null
+    );
+
+
+    this.generateNumberOfSlots =
+      100;
+
+    this.generatePrefix =
+      'P';
+
+    this.generateStartNumber =
+      1;
+
+    this.generateZone =
+      'A';
+
+    this.generateFee =
+      this.event()
+        ?.parkingFee
+      ??
+      0;
+
+
+    this.showGenerateForm.set(
+      true
+    );
+
+    this.clearMessages();
+  }
+
+
+  closeGenerateForm(): void {
+
+    this.showGenerateForm.set(
+      false
+    );
+  }
+
+
+  /* =====================================================
+     CREATE ONE SLOT
+     ===================================================== */
 
   createParkingSlot(): void {
 
@@ -402,16 +510,20 @@ export class AdminParking
       this.createFee;
 
 
-    if (!currentEvent) {
+    if (
+      !currentEvent
+    ) {
 
       return;
     }
 
 
     if (
-      !this.createSlotNumber.trim()
+      !this.createSlotNumber
+        .trim()
       ||
-      !this.createZone.trim()
+      !this.createZone
+        .trim()
       ||
       fee === null
       ||
@@ -426,7 +538,9 @@ export class AdminParking
     }
 
 
-    this.isSaving.set(true);
+    this.isSaving.set(
+      true
+    );
 
     this.clearMessages();
 
@@ -452,7 +566,9 @@ export class AdminParking
 
         finalize(() => {
 
-          this.isSaving.set(false);
+          this.isSaving.set(
+            false
+          );
 
         })
 
@@ -485,7 +601,8 @@ export class AdminParking
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
           this.errorMessage.set(
@@ -500,15 +617,194 @@ export class AdminParking
   }
 
 
-  /* =========================================================
+  /* =====================================================
+     GENERATE MANY PARKING SLOTS
+     ===================================================== */
+
+  generateParkingSlots(): void {
+
+    const currentEvent =
+      this.event();
+
+
+    if (
+      !currentEvent
+    ) {
+
+      return;
+    }
+
+
+    const numberOfSlots =
+      Number(
+        this.generateNumberOfSlots
+      );
+
+
+    const startNumber =
+      Number(
+        this.generateStartNumber
+      );
+
+
+    const fee =
+      this.generateFee;
+
+
+    if (
+      !Number.isInteger(
+        numberOfSlots
+      )
+      ||
+      numberOfSlots <= 0
+      ||
+      numberOfSlots > 500
+    ) {
+
+      this.errorMessage.set(
+        'Number of slots must be between 1 and 500.'
+      );
+
+      return;
+    }
+
+
+    if (
+      !Number.isInteger(
+        startNumber
+      )
+      ||
+      startNumber <= 0
+    ) {
+
+      this.errorMessage.set(
+        'Start number must be greater than zero.'
+      );
+
+      return;
+    }
+
+
+    if (
+      !this.generateZone
+        .trim()
+    ) {
+
+      this.errorMessage.set(
+        'Parking zone is required.'
+      );
+
+      return;
+    }
+
+
+    if (
+      fee === null
+      ||
+      fee < 0
+    ) {
+
+      this.errorMessage.set(
+        'Enter a valid parking fee.'
+      );
+
+      return;
+    }
+
+
+    this.isSaving.set(
+      true
+    );
+
+    this.clearMessages();
+
+
+    this.parkingService
+      .generate(
+        currentEvent.id,
+        {
+
+          numberOfSlots,
+
+          prefix:
+            this.generatePrefix
+              .trim(),
+
+          startNumber,
+
+          zone:
+            this.generateZone
+              .trim(),
+
+          fee
+
+        }
+      )
+      .pipe(
+
+        finalize(() => {
+
+          this.isSaving.set(
+            false
+          );
+
+        })
+
+      )
+      .subscribe({
+
+        next: generatedSlots => {
+
+          this.parkingSlots.update(
+            current => [
+              ...current,
+              ...generatedSlots
+            ]
+          );
+
+
+          this.showGenerateForm.set(
+            false
+          );
+
+
+          this.successMessage.set(
+            `${generatedSlots.length} parking slots generated successfully.`
+          );
+
+        },
+
+
+        error: (
+          error:
+            HttpErrorResponse
+        ) => {
+
+          this.errorMessage.set(
+            this.getErrorMessage(
+              error
+            )
+          );
+
+        }
+
+      });
+  }
+
+
+  /* =====================================================
      EDIT
-     ========================================================= */
+     ===================================================== */
 
   startEdit(
     slot: ParkingSlot
   ): void {
 
     this.showCreateForm.set(
+      false
+    );
+
+    this.showGenerateForm.set(
       false
     );
 
@@ -521,11 +817,14 @@ export class AdminParking
     this.editSlotNumber =
       slot.slotNumber;
 
+
     this.editZone =
       slot.zone;
 
+
     this.editFee =
       slot.fee;
+
 
     this.editStatus =
       slot.status;
@@ -543,6 +842,10 @@ export class AdminParking
   }
 
 
+  /* =====================================================
+     SAVE EDIT
+     ===================================================== */
+
   saveEdit(): void {
 
     const slotId =
@@ -559,9 +862,11 @@ export class AdminParking
 
 
     if (
-      !this.editSlotNumber.trim()
+      !this.editSlotNumber
+        .trim()
       ||
-      !this.editZone.trim()
+      !this.editZone
+        .trim()
       ||
       fee === null
       ||
@@ -576,7 +881,9 @@ export class AdminParking
     }
 
 
-    this.isSaving.set(true);
+    this.isSaving.set(
+      true
+    );
 
     this.clearMessages();
 
@@ -605,7 +912,9 @@ export class AdminParking
 
         finalize(() => {
 
-          this.isSaving.set(false);
+          this.isSaving.set(
+            false
+          );
 
         })
 
@@ -641,7 +950,8 @@ export class AdminParking
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
           this.errorMessage.set(
@@ -656,9 +966,9 @@ export class AdminParking
   }
 
 
-  /* =========================================================
+  /* =====================================================
      DELETE
-     ========================================================= */
+     ===================================================== */
 
   deleteParkingSlot(
     slot: ParkingSlot
@@ -692,7 +1002,9 @@ export class AdminParking
     }
 
 
-    this.isSaving.set(true);
+    this.isSaving.set(
+      true
+    );
 
     this.clearMessages();
 
@@ -705,7 +1017,9 @@ export class AdminParking
 
         finalize(() => {
 
-          this.isSaving.set(false);
+          this.isSaving.set(
+            false
+          );
 
         })
 
@@ -732,7 +1046,8 @@ export class AdminParking
 
 
         error: (
-          error: HttpErrorResponse
+          error:
+            HttpErrorResponse
         ) => {
 
           this.errorMessage.set(
@@ -747,15 +1062,18 @@ export class AdminParking
   }
 
 
-  /* =========================================================
+  /* =====================================================
      STATUS
-     ========================================================= */
+     ===================================================== */
 
   getStatusText(
-    status: ParkingSlotStatus
+    status:
+      ParkingSlotStatus
   ): string {
 
-    switch (status) {
+    switch (
+      status
+    ) {
 
       case ParkingSlotStatus.Available:
 
@@ -785,9 +1103,9 @@ export class AdminParking
   }
 
 
-  /* =========================================================
+  /* =====================================================
      NAVIGATION
-     ========================================================= */
+     ===================================================== */
 
   backToEvents(): void {
 
@@ -803,7 +1121,9 @@ export class AdminParking
       this.event();
 
 
-    if (!currentEvent) {
+    if (
+      !currentEvent
+    ) {
 
       return;
     }
@@ -815,37 +1135,47 @@ export class AdminParking
   }
 
 
-  /* =========================================================
+  /* =====================================================
      HELPERS
-     ========================================================= */
+     ===================================================== */
 
   private resetCreateForm(): void {
 
-    this.createSlotNumber = '';
+    this.createSlotNumber =
+      '';
 
-    this.createZone = '';
+    this.createZone =
+      '';
 
-    this.createFee = null;
+    this.createFee =
+      null;
   }
 
 
   private clearMessages(): void {
 
-    this.errorMessage.set('');
+    this.errorMessage.set(
+      ''
+    );
 
-    this.successMessage.set('');
+    this.successMessage.set(
+      ''
+    );
   }
 
 
   private getErrorMessage(
-    error: HttpErrorResponse
+    error:
+      HttpErrorResponse
   ): string {
 
     if (
       error.status === 0
     ) {
 
-      return 'Unable to connect to the VenueFlow server.';
+      return (
+        'Unable to connect to the VenueFlow server.'
+      );
     }
 
 
@@ -866,7 +1196,9 @@ export class AdminParking
       error.status === 400
     ) {
 
-      return 'The parking slot information is invalid.';
+      return (
+        'The parking information is invalid.'
+      );
     }
 
 
@@ -874,7 +1206,9 @@ export class AdminParking
       error.status === 404
     ) {
 
-      return 'Event or parking slot could not be found.';
+      return (
+        'Event or parking slot could not be found.'
+      );
     }
 
 
@@ -882,7 +1216,9 @@ export class AdminParking
       error.status === 409
     ) {
 
-      return 'A parking slot with this number may already exist.';
+      return (
+        'One or more parking slot numbers already exist.'
+      );
     }
 
 
@@ -890,7 +1226,9 @@ export class AdminParking
       error.status === 401
     ) {
 
-      return 'Your login session has expired.';
+      return (
+        'Your login session has expired.'
+      );
     }
 
 
@@ -898,10 +1236,15 @@ export class AdminParking
       error.status === 403
     ) {
 
-      return 'Administrator access is required.';
+      return (
+        'Administrator access is required.'
+      );
     }
 
 
-    return 'Unable to complete the parking operation.';
+    return (
+      'Unable to complete the parking operation.'
+    );
   }
+
 }

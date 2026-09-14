@@ -56,6 +56,7 @@ interface SeatRow {
   seats: Seat[];
 }
 
+
 interface PositionedSeat {
   seat: Seat;
   x: number;
@@ -139,6 +140,7 @@ export class AdminSeats
     description: string;
     icon: string;
   }[] = [
+
     {
       type: 'Theatre',
       title: 'Theatre',
@@ -146,13 +148,15 @@ export class AdminSeats
         'Stage in front with straight seat rows.',
       icon: '🎭'
     },
+
     {
       type: 'Stadium',
       title: 'Stadium / Oval',
       description:
-        'Sports field with curved seating around it.',
+        'Sports field surrounded by clean oval seating rings.',
       icon: '🏟️'
     },
+
     {
       type: 'Arena',
       title: 'Arena / Circular',
@@ -160,6 +164,7 @@ export class AdminSeats
         'Central arena surrounded by seat rings.',
       icon: '⭕'
     },
+
     {
       type: 'Grid',
       title: 'Standard Grid',
@@ -167,6 +172,7 @@ export class AdminSeats
         'Simple row and column seating arrangement.',
       icon: '▦'
     }
+
   ];
 
 
@@ -221,7 +227,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     SORTED SEATS
+     SORT SEATS
      ========================================================= */
 
   readonly sortedSeats =
@@ -236,14 +242,13 @@ export class AdminSeats
         ) => {
 
           const rowCompare =
-            first.rowLabel
-              .localeCompare(
-                second.rowLabel,
-                undefined,
-                {
-                  numeric: true
-                }
-              );
+            first.rowLabel.localeCompare(
+              second.rowLabel,
+              undefined,
+              {
+                numeric: true
+              }
+            );
 
           if (
             rowCompare !== 0
@@ -253,8 +258,7 @@ export class AdminSeats
           }
 
           return (
-            first.columnNumber
-            -
+            first.columnNumber -
             second.columnNumber
           );
         }
@@ -263,7 +267,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     GROUP INTO ROWS
+     GROUP SEATS INTO ROWS
      ========================================================= */
 
   readonly seatRows =
@@ -320,17 +324,17 @@ export class AdminSeats
                 first,
                 second
               ) =>
-                first.columnNumber
-                -
+                first.columnNumber -
                 second.columnNumber
             )
+
         })
       );
     });
 
 
   /* =========================================================
-     STADIUM OVAL POSITIONS
+     STADIUM / OVAL POSITIONS
      ========================================================= */
 
   readonly stadiumSeatPositions =
@@ -351,51 +355,73 @@ export class AdminSeats
       }
 
 
-      const splitIndex =
-        Math.ceil(
-          rows.length / 2
-        );
+      const totalRows =
+        rows.length;
 
 
-      const topRows =
-        rows.slice(
-          0,
-          splitIndex
-        );
+      const innerRadiusX =
+        29;
+
+      const innerRadiusY =
+        25;
 
 
-      const bottomRows =
-        rows.slice(
-          splitIndex
-        );
+      const outerRadiusX =
+        45;
+
+      const outerRadiusY =
+        44;
 
 
-      /*
-        TOP HALF
-
-        Each row follows a different
-        elliptical arc.
-
-        First row = outer
-        Last top row = inner
-      */
-
-      topRows.forEach(
+      rows.forEach(
         (
           row,
           rowIndex
         ) => {
 
+          const rowProgress =
+            totalRows <= 1
+              ? 0
+              : rowIndex /
+                (
+                  totalRows - 1
+                );
+
+
           const radiusX =
-            44
-            -
-            rowIndex * 1.9;
+            innerRadiusX +
+            (
+              outerRadiusX -
+              innerRadiusX
+            ) *
+            rowProgress;
 
 
           const radiusY =
-            38
-            -
-            rowIndex * 2.0;
+            innerRadiusY +
+            (
+              outerRadiusY -
+              innerRadiusY
+            ) *
+            rowProgress;
+
+
+          const seatCount =
+            Math.max(
+              row.seats.length,
+              1
+            );
+
+
+          const seatStep =
+            360 /
+            seatCount;
+
+
+          const stagger =
+            rowIndex % 2 === 0
+              ? 0
+              : seatStep / 2;
 
 
           row.seats.forEach(
@@ -404,51 +430,32 @@ export class AdminSeats
               seatIndex
             ) => {
 
-              const progress =
-                row.seats.length <= 1
-                  ? 0.5
-                  : seatIndex /
-                    (
-                      row.seats.length
-                      -
-                      1
-                    );
-
-
-              /*
-                Upper ellipse:
-                205° -> 335°
-              */
-
               const angle =
-                205
-                +
-                progress * 130;
+                -90 +
+                stagger +
+                (
+                  seatStep *
+                  seatIndex
+                );
 
 
               const radians =
-                angle
-                *
-                Math.PI
-                /
+                angle *
+                Math.PI /
                 180;
 
 
               const x =
-                50
-                +
-                radiusX
-                *
+                50 +
+                radiusX *
                 Math.cos(
                   radians
                 );
 
 
               const y =
-                50
-                +
-                radiusY
-                *
+                50 +
+                radiusY *
                 Math.sin(
                   radians
                 );
@@ -459,108 +466,10 @@ export class AdminSeats
                 x,
                 y
               });
+
             }
           );
-        }
-      );
 
-
-      /*
-        BOTTOM HALF
-
-        First bottom row = inner
-        Last bottom row = outer
-      */
-
-      bottomRows.forEach(
-        (
-          row,
-          rowIndex
-        ) => {
-
-          const reverseIndex =
-            bottomRows.length
-            -
-            1
-            -
-            rowIndex;
-
-
-          const radiusX =
-            44
-            -
-            reverseIndex * 1.9;
-
-
-          const radiusY =
-            38
-            -
-            reverseIndex * 2.0;
-
-
-          row.seats.forEach(
-            (
-              seat,
-              seatIndex
-            ) => {
-
-              const progress =
-                row.seats.length <= 1
-                  ? 0.5
-                  : seatIndex /
-                    (
-                      row.seats.length
-                      -
-                      1
-                    );
-
-
-              /*
-                Lower ellipse:
-                25° -> 155°
-              */
-
-              const angle =
-                25
-                +
-                progress * 130;
-
-
-              const radians =
-                angle
-                *
-                Math.PI
-                /
-                180;
-
-
-              const x =
-                50
-                +
-                radiusX
-                *
-                Math.cos(
-                  radians
-                );
-
-
-              const y =
-                50
-                +
-                radiusY
-                *
-                Math.sin(
-                  radians
-                );
-
-
-              positions.push({
-                seat,
-                x,
-                y
-              });
-            }
-          );
         }
       );
 
@@ -570,7 +479,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     ARENA RING POSITIONS
+     ARENA POSITIONS
      ========================================================= */
 
   readonly arenaSeatPositions =
@@ -609,20 +518,13 @@ export class AdminSeats
             denominator;
 
 
-          /*
-            A row = inner ring
-            Last row = outer ring
-          */
-
           const radiusX =
-            18
-            +
+            18 +
             progress * 27;
 
 
           const radiusY =
-            18
-            +
+            18 +
             progress * 27;
 
 
@@ -640,39 +542,31 @@ export class AdminSeats
 
 
               const angle =
-                -90
-                +
+                -90 +
                 (
                   360 /
                   seatCount
-                )
-                *
+                ) *
                 seatIndex;
 
 
               const radians =
-                angle
-                *
-                Math.PI
-                /
+                angle *
+                Math.PI /
                 180;
 
 
               const x =
-                50
-                +
-                radiusX
-                *
+                50 +
+                radiusX *
                 Math.cos(
                   radians
                 );
 
 
               const y =
-                50
-                +
-                radiusY
-                *
+                50 +
+                radiusY *
                 Math.sin(
                   radians
                 );
@@ -683,8 +577,10 @@ export class AdminSeats
                 x,
                 y
               });
+
             }
           );
+
         }
       );
 
@@ -770,6 +666,7 @@ export class AdminSeats
         false
       );
 
+
       this.errorMessage.set(
         'Invalid event.'
       );
@@ -785,7 +682,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     LOAD
+     LOAD DATA
      ========================================================= */
 
   loadData(
@@ -861,9 +758,11 @@ export class AdminSeats
             null
           );
 
+
           this.seats.set(
             []
           );
+
 
           this.errorMessage.set(
             this.getErrorMessage(
@@ -878,7 +777,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     LAYOUT
+     SELECT LAYOUT
      ========================================================= */
 
   selectLayout(
@@ -893,6 +792,10 @@ export class AdminSeats
     this.clearMessages();
   }
 
+
+  /* =========================================================
+     SAVE LAYOUT
+     ========================================================= */
 
   saveLayout(): void {
 
@@ -934,12 +837,6 @@ export class AdminSeats
       .subscribe({
 
         next: updatedEvent => {
-
-          /*
-            Keep old navigation names if
-            backend PATCH response does not
-            populate them.
-          */
 
           this.event.set({
 
@@ -1025,7 +922,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     CREATE SEAT
+     CREATE SINGLE SEAT
      ========================================================= */
 
   createSeat(): void {
@@ -1094,6 +991,7 @@ export class AdminSeats
 
           priceOverride:
             this.createPriceOverride
+
         }
       )
       .pipe(
@@ -1182,7 +1080,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     GENERATE SEAT MAP
+     GENERATE FULL SEAT MAP
      ========================================================= */
 
   generateSeatMap(): void {
@@ -1290,24 +1188,29 @@ export class AdminSeats
           this.successMessage.set(
             response.message
             ||
-            `${response.totalSeats} seats generated successfully.`
+            `${response.totalSeats} seats generated successfully. Opening Parking Management...`
           );
 
 
+          /*
+            =================================================
+            AUTO NAVIGATION
+
+            SEATS SUCCESS
+                    ↓
+            PARKING MANAGEMENT
+            =================================================
+          */
+
           setTimeout(() => {
 
-            document
-              .getElementById(
-                'visual-seat-map'
-              )
-              ?.scrollIntoView({
-                behavior:
-                  'smooth',
-                block:
-                  'start'
-              });
+            this.router.navigate([
+              '/admin/events',
+              currentEvent.id,
+              'parking'
+            ]);
 
-          }, 100);
+          }, 700);
 
         },
 
@@ -1330,7 +1233,7 @@ export class AdminSeats
 
 
   /* =========================================================
-     EDIT
+     START EDIT
      ========================================================= */
 
   startEdit(
@@ -1379,6 +1282,10 @@ export class AdminSeats
     );
   }
 
+
+  /* =========================================================
+     SAVE EDIT
+     ========================================================= */
 
   saveEdit(): void {
 
@@ -1446,6 +1353,7 @@ export class AdminSeats
 
           priceOverride:
             this.editPriceOverride
+
         }
       )
       .pipe(
@@ -1615,16 +1523,24 @@ export class AdminSeats
     ) {
 
       case SeatStatus.Available:
+
         return 'Available';
 
+
       case SeatStatus.Held:
+
         return 'Held';
 
+
       case SeatStatus.Booked:
+
         return 'Booked';
 
+
       default:
+
         return 'Unknown';
+
     }
   }
 
@@ -1705,7 +1621,9 @@ export class AdminSeats
       error.status === 0
     ) {
 
-      return 'Unable to connect to the EventiGo server.';
+      return (
+        'Unable to connect to the VenueFlow server.'
+      );
     }
 
 
@@ -1726,7 +1644,9 @@ export class AdminSeats
       error.status === 400
     ) {
 
-      return 'The seat information is invalid.';
+      return (
+        'The seat information is invalid.'
+      );
     }
 
 
@@ -1734,7 +1654,9 @@ export class AdminSeats
       error.status === 404
     ) {
 
-      return 'Event or seat could not be found.';
+      return (
+        'Event or seat could not be found.'
+      );
     }
 
 
@@ -1742,7 +1664,9 @@ export class AdminSeats
       error.status === 409
     ) {
 
-      return 'The requested seat operation conflicts with existing data.';
+      return (
+        'The requested seat operation conflicts with existing data.'
+      );
     }
 
 
@@ -1750,7 +1674,9 @@ export class AdminSeats
       error.status === 401
     ) {
 
-      return 'Your login session has expired.';
+      return (
+        'Your login session has expired.'
+      );
     }
 
 
@@ -1758,10 +1684,15 @@ export class AdminSeats
       error.status === 403
     ) {
 
-      return 'Administrator access is required.';
+      return (
+        'Administrator access is required.'
+      );
     }
 
 
-    return 'Unable to complete the seat operation.';
+    return (
+      'Unable to complete the seat operation.'
+    );
   }
+
 }

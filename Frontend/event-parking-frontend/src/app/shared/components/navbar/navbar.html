@@ -1,4 +1,5 @@
 <header class="navbar">
+
   <div class="container navbar-inner">
 
     <a
@@ -22,26 +23,62 @@
       </div>
     </a>
 
+
     <nav class="nav-links">
-      @for (item of items; track item.route) {
+
+      @for (
+        item of items;
+        track item.route
+      ) {
+
         <a
           [routerLink]="item.route"
           routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+          [routerLinkActiveOptions]="{
+            exact: item.route === '/'
+          }"
         >
           {{ item.label }}
         </a>
+
       }
+
     </nav>
 
-    @if (showLogin) {
-      <a
-        routerLink="/login"
-        class="btn btn-primary login-btn"
+
+    @if (showLogout) {
+
+      <button
+        type="button"
+        class="logout-btn"
+        (click)="logout()"
       >
-        Sign In
-      </a>
+        Logout
+        <span>→</span>
+      </button>
+
+    } @else if (showLogin) {
+
+      <div class="auth-actions">
+
+        <a
+          routerLink="/customer-login"
+          class="customer-login-btn"
+        >
+          Customer Login
+        </a>
+
+        <a
+          routerLink="/admin-login"
+          class="admin-login-btn"
+        >
+          Admin Login
+        </a>
+
+      </div>
+
     }
 
   </div>
+
 </header>

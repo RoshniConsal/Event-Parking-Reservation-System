@@ -20,9 +20,6 @@ import {
   roleGuard
 } from './core/guards/role-guard';
 
-import {
-  Router
-} from '@angular/router';
 
 export const routes: Routes = [
 
@@ -68,9 +65,16 @@ export const routes: Routes = [
           )
       },
 
+      // =================================================
+      // CUSTOMER LOGIN
+      // =================================================
       {
-        path: 'login',
-        title: 'Login | VenueFlow',
+        path: 'customer-login',
+        title: 'Customer Login | VenueFlow',
+
+        data: {
+          loginRole: 'Customer'
+        },
 
         loadComponent: () =>
           import(
@@ -78,6 +82,33 @@ export const routes: Routes = [
           ).then(
             m => m.Login
           )
+      },
+
+      // =================================================
+      // ADMIN LOGIN
+      // =================================================
+      {
+        path: 'admin-login',
+        title: 'Admin Login | VenueFlow',
+
+        data: {
+          loginRole: 'Administrator'
+        },
+
+        loadComponent: () =>
+          import(
+            './features/auth/login/login'
+          ).then(
+            m => m.Login
+          )
+      },
+
+      // OLD /login URL BREAK AAGAAMA CUSTOMER LOGIN-KU
+      // REDIRECT PANNUM
+      {
+        path: 'login',
+        pathMatch: 'full',
+        redirectTo: 'customer-login'
       },
 
       {
