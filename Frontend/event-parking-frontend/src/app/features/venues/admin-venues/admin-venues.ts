@@ -20,6 +20,10 @@ import {
 } from '@angular/common/http';
 
 import {
+  Router
+} from '@angular/router';
+
+import {
   finalize
 } from 'rxjs';
 
@@ -57,30 +61,27 @@ export class AdminVenues
   private readonly fb =
     inject(FormBuilder);
 
+  private readonly router =
+    inject(Router);
+
 
   readonly venues =
     signal<Venue[]>([]);
 
-
   readonly isLoading =
     signal(true);
-
 
   readonly isSaving =
     signal(false);
 
-
   readonly deletingId =
     signal<number | null>(null);
-
 
   readonly editingVenueId =
     signal<number | null>(null);
 
-
   readonly errorMessage =
     signal('');
-
 
   readonly successMessage =
     signal('');
@@ -119,7 +120,6 @@ export class AdminVenues
   ngOnInit(): void {
 
     this.loadVenues();
-
   }
 
 
@@ -133,13 +133,9 @@ export class AdminVenues
     this.venueService
       .getAll()
       .pipe(
-
         finalize(() => {
-
           this.isLoading.set(false);
-
         })
-
       )
       .subscribe({
 
@@ -153,7 +149,6 @@ export class AdminVenues
                 )
             )
           );
-
         },
 
 
@@ -167,11 +162,9 @@ export class AdminVenues
               'Unable to load venues.'
             )
           );
-
         }
 
       });
-
   }
 
 
@@ -206,7 +199,6 @@ export class AdminVenues
       top: 0,
       behavior: 'smooth'
     });
-
   }
 
 
@@ -214,16 +206,9 @@ export class AdminVenues
 
     this.editingVenueId.set(null);
 
-    this.venueForm.reset({
-
-      name: '',
-      address: '',
-      capacity: 1
-
-    });
+    this.resetForm();
 
     this.errorMessage.set('');
-
   }
 
 
@@ -238,33 +223,34 @@ export class AdminVenues
       this.venueForm.invalid
     ) {
 
-      this.venueForm.markAllAsTouched();
+      this.venueForm
+        .markAllAsTouched();
 
       return;
-
     }
 
 
     const formValue =
-      this.venueForm.getRawValue();
+      this.venueForm
+        .getRawValue();
 
 
     const request:
       VenueCreateRequest |
       VenueUpdateRequest = {
 
-        name:
-          formValue.name.trim(),
+      name:
+        formValue.name.trim(),
 
-        address:
-          formValue.address.trim(),
+      address:
+        formValue.address.trim(),
 
-        capacity:
-          Number(
-            formValue.capacity
-          )
+      capacity:
+        Number(
+          formValue.capacity
+        )
 
-      };
+    };
 
 
     if (
@@ -277,7 +263,6 @@ export class AdminVenues
       );
 
       return;
-
     }
 
 
@@ -303,45 +288,57 @@ export class AdminVenues
 
     operation$
       .pipe(
-
         finalize(() => {
-
           this.isSaving.set(false);
-
         })
-
       )
       .subscribe({
 
         next: () => {
 
-          this.successMessage.set(
+          /*
+            NEW VENUE
+            Venue -> Category
+          */
 
+          if (
             editingId === null
+          ) {
 
-              ? 'Venue created successfully.'
+            this.successMessage.set(
+              'Venue created successfully. Opening Category Management...'
+            );
 
-              : 'Venue updated successfully.'
+            this.resetForm();
 
+            setTimeout(() => {
+
+              this.router.navigate([
+                '/admin/categories'
+              ]);
+
+            }, 500);
+
+            return;
+          }
+
+
+          /*
+            EDIT VENUE
+            Stay on same page
+          */
+
+          this.successMessage.set(
+            'Venue updated successfully.'
           );
-
 
           this.editingVenueId.set(
             null
           );
 
-
-          this.venueForm.reset({
-
-            name: '',
-            address: '',
-            capacity: 1
-
-          });
-
+          this.resetForm();
 
           this.loadVenues();
-
         },
 
 
@@ -352,18 +349,15 @@ export class AdminVenues
           this.errorMessage.set(
             this.getErrorMessage(
               error,
+
               editingId === null
-
                 ? 'Unable to create venue.'
-
                 : 'Unable to update venue.'
             )
           );
-
         }
 
       });
-
   }
 
 
@@ -378,9 +372,7 @@ export class AdminVenues
 
 
     if (!confirmed) {
-
       return;
-
     }
 
 
@@ -398,13 +390,9 @@ export class AdminVenues
         venue.id
       )
       .pipe(
-
         finalize(() => {
-
           this.deletingId.set(null);
-
         })
-
       )
       .subscribe({
 
@@ -421,12 +409,10 @@ export class AdminVenues
           ) {
 
             this.cancelEdit();
-
           }
 
 
           this.loadVenues();
-
         },
 
 
@@ -440,11 +426,21 @@ export class AdminVenues
               'Unable to delete venue.'
             )
           );
-
         }
 
       });
+  }
 
+
+  private resetForm(): void {
+
+    this.venueForm.reset({
+
+      name: '',
+      address: '',
+      capacity: 1
+
+    });
   }
 
 
@@ -458,7 +454,6 @@ export class AdminVenues
     ) {
 
       return 'Unable to connect to the VenueFlow server. Please make sure the backend API is running.';
-
     }
 
 
@@ -467,7 +462,6 @@ export class AdminVenues
     ) {
 
       return 'Your login session has expired. Please sign in again.';
-
     }
 
 
@@ -476,7 +470,6 @@ export class AdminVenues
     ) {
 
       return 'You are not allowed to manage venues.';
-
     }
 
 
@@ -489,7 +482,6 @@ export class AdminVenues
         ||
         'This venue cannot be changed because it is currently being used.'
       );
-
     }
 
 
@@ -503,12 +495,10 @@ export class AdminVenues
     ) {
 
       return backendMessage;
-
     }
 
 
     return fallback;
-
   }
 
 }

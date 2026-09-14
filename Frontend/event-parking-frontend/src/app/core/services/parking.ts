@@ -1,94 +1,165 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {
+  inject,
+  Injectable
+} from '@angular/core';
 
-import { environment } from '../../../environments/environment';
+import {
+  HttpClient,
+  HttpParams
+} from '@angular/common/http';
+
+import {
+  Observable
+} from 'rxjs';
+
+import {
+  environment
+} from '../../../environments/environment';
 
 import {
   ParkingSlot,
   ParkingSlotCreateRequest,
+  ParkingSlotGenerateRequest,
   ParkingSlotUpdateRequest
 } from '../models/parking-slot.model';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class ParkingService {
 
-  private readonly http = inject(HttpClient);
+  private readonly http =
+    inject(HttpClient);
+
 
   private readonly apiUrl =
     environment.apiUrl;
 
-  /*
-    GET /api/events/{eventId}/parking-slots
-  */
+
+  /* =====================================================
+     GET EVENT PARKING
+     ===================================================== */
+
   getByEvent(
     eventId: number,
     availableOnly = false
   ): Observable<ParkingSlot[]> {
 
-    const params = new HttpParams()
-      .set(
-        'availableOnly',
-        availableOnly.toString()
-      );
+    const params =
+      new HttpParams()
+        .set(
+          'availableOnly',
+          availableOnly.toString()
+        );
 
-    return this.http.get<ParkingSlot[]>(
-      `${this.apiUrl}/events/${eventId}/parking-slots`,
-      { params }
-    );
+
+    return this.http
+      .get<ParkingSlot[]>(
+
+        `${this.apiUrl}/events/${eventId}/parking-slots`,
+
+        {
+          params
+        }
+      );
   }
 
-  // GET /api/parking-slots/{id}
+
+  /* =====================================================
+     GET SLOT
+     ===================================================== */
+
   getById(
     id: number
   ): Observable<ParkingSlot> {
 
-    return this.http.get<ParkingSlot>(
-      `${this.apiUrl}/parking-slots/${id}`
-    );
+    return this.http
+      .get<ParkingSlot>(
+
+        `${this.apiUrl}/parking-slots/${id}`
+
+      );
   }
 
-  /*
-    POST /api/events/{eventId}/parking-slots
 
-    Admin only
-  */
+  /* =====================================================
+     CREATE ONE SLOT
+     ===================================================== */
+
   create(
     eventId: number,
-    request: ParkingSlotCreateRequest
+    request:
+      ParkingSlotCreateRequest
   ): Observable<ParkingSlot> {
 
-    return this.http.post<ParkingSlot>(
-      `${this.apiUrl}/events/${eventId}/parking-slots`,
-      request
-    );
+    return this.http
+      .post<ParkingSlot>(
+
+        `${this.apiUrl}/events/${eventId}/parking-slots`,
+
+        request
+
+      );
   }
 
-  // PUT /api/parking-slots/{id}
+
+  /* =====================================================
+     GENERATE MANY SLOTS
+     ===================================================== */
+
+  generate(
+    eventId: number,
+    request:
+      ParkingSlotGenerateRequest
+  ): Observable<ParkingSlot[]> {
+
+    return this.http
+      .post<ParkingSlot[]>(
+
+        `${this.apiUrl}/events/${eventId}/parking-slots/generate`,
+
+        request
+
+      );
+  }
+
+
+  /* =====================================================
+     UPDATE
+     ===================================================== */
+
   update(
     id: number,
-    request: ParkingSlotUpdateRequest
+    request:
+      ParkingSlotUpdateRequest
   ): Observable<ParkingSlot> {
 
-    return this.http.put<ParkingSlot>(
-      `${this.apiUrl}/parking-slots/${id}`,
-      request
-    );
+    return this.http
+      .put<ParkingSlot>(
+
+        `${this.apiUrl}/parking-slots/${id}`,
+
+        request
+
+      );
   }
 
-  /*
-    DELETE /api/parking-slots/{id}
 
-    Backend 204 No Content return pannuthu.
-  */
+  /* =====================================================
+     DELETE
+     ===================================================== */
+
   delete(
     id: number
   ): Observable<void> {
 
-    return this.http.delete<void>(
-      `${this.apiUrl}/parking-slots/${id}`
-    );
+    return this.http
+      .delete<void>(
+
+        `${this.apiUrl}/parking-slots/${id}`
+
+      );
   }
+
 }

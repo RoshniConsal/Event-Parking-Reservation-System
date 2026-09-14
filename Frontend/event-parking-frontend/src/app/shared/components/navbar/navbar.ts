@@ -1,5 +1,14 @@
-import { Component, Input } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output
+} from '@angular/core';
+
+import {
+  RouterLink,
+  RouterLinkActive
+} from '@angular/router';
 
 export interface NavbarItem {
   label: string;
@@ -17,9 +26,20 @@ export interface NavbarItem {
   styleUrl: './navbar.css'
 })
 export class Navbar {
+
   @Input() brand = 'VenueFlow';
   @Input() items: NavbarItem[] = [];
   @Input() showLogin = true;
+  @Input() showLogout = false;
 
-  readonly logoPath = '/branding/venueflow-logo.png';
+  @Output()
+  logoutClicked =
+    new EventEmitter<void>();
+
+  readonly logoPath =
+    '/branding/venueflow-logo.png';
+
+  logout(): void {
+    this.logoutClicked.emit();
+  }
 }

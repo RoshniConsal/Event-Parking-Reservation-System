@@ -1,21 +1,43 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {
+  Component,
+  inject
+} from '@angular/core';
+
+import {
+  Router,
+  RouterOutlet
+} from '@angular/router';
 
 import {
   Navbar,
   NavbarItem
 } from '../../shared/components/navbar/navbar';
 
+import {
+  AuthService
+} from '../../core/services/auth';
+
 @Component({
   selector: 'app-customer-layout',
+
   imports: [
     RouterOutlet,
     Navbar
   ],
-  templateUrl: './customer-layout.html',
-  styleUrl: './customer-layout.css'
+
+  templateUrl:
+    './customer-layout.html',
+
+  styleUrl:
+    './customer-layout.css'
 })
 export class CustomerLayout {
+
+  private readonly router =
+    inject(Router);
+
+  private readonly authService =
+    inject(AuthService);
 
   readonly navItems: NavbarItem[] = [
     {
@@ -39,4 +61,13 @@ export class CustomerLayout {
       route: '/customer/notifications'
     }
   ];
+
+  logout(): void {
+
+    this.authService.logout();
+
+    this.router.navigate([
+      '/customer-login'
+    ]);
+  }
 }
